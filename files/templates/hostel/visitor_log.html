@@ -1,0 +1,87 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <h2><i class="fas fa-clipboard-check"></i> Visitor Entry/Exit Log</h2>
+  <p class="text-muted">Today's Date: {{ today|date:"F d, Y" }}</p>
+
+  <div class="row">
+    <!-- Today's Approved Visitors -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h5><i class="fas fa-users"></i> Today's Approved Visitors</h5>
+        </div>
+        <div class="card-body">
+          {% for visitor in visitors_today %}
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+              <div>
+                <strong>{{ visitor.visitor_name }}</strong><br>
+                <small>Student: {{ visitor.student.user.get_full_name }}</small><br>
+                <small>Phone: {{ visitor.phone_number }}</small><br>
+                <small>Time: {{ visitor.expected_entry_time|time:"H:i" }} - {{ visitor.expected_exit_time|time:"H:i" }}</small>
+              </div>
+              <div>
+                {% if visitor.visitorlog.entry_time %}
+                  <span class="badge bg-success">Entered</span>
+                  {% if not visitor.visitorlog.exit_time %}
+                    <form method="post" action="{% url 'mark_exit' visitor.pk %}" class="d-inline ms-2">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Exit
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="badge bg-secondary">Exited</span>
+                  {% endif %}
+                {% else %}
+                  <form method="post" action="{% url 'mark_entry' visitor.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">
+                      <i class="fas fa-sign-in-alt"></i> Entry
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <p class="text-muted">No approved visitors for today.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Logs -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5><i class="fas fa-history"></i> Today's Activity Log</h5>
+        </div>
+        <div class="card-body">
+          {% for log in logs %}
+            <div class="mb-3 p-2 border rounded">
+              <strong>{{ log.visitor.visitor_name }}</strong><br>
+              <small>Student: {{ log.visitor.student.user.get_full_name }}</small><br>
+              {% if log.entry_time %}
+                <small class="text-success">
+                  <i class="fas fa-sign-in-alt"></i> Entry: {{ log.entry_time|time:"H:i:s" }}
+                </small><br>
+              {% endif %}
+              {% if log.exit_time %}
+                <small class="text-danger">
+                  <i class="fas fa-sign-out-alt"></i> Exit: {{ log.exit_time|time:"H:i:s" }}
+                </small><br>
+              {% endif %}
+              {% if log.security_staff %}
+                <small class="text-muted">Recorded by: {{ log.security_staff.get_full_name }}</small>
+              {% endif %}
+            </div>
+          {% empty %}
+            <p class="text-muted">No activity logs for today.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

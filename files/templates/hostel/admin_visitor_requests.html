@@ -1,0 +1,141 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <h2><i class="fas fa-clipboard-list"></i> Visitor Requests Management</h2>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs" id="visitorTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+        Pending <span class="badge bg-warning">{{ pending.count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
+        Approved <span class="badge bg-success">{{ approved.count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">
+        Rejected <span class="badge bg-danger">{{ rejected.count }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="visitorTabsContent">
+    <!-- Pending Requests -->
+    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+      <div class="row mt-4">
+        {% for visitor in pending %}
+          <div class="col-md-6 mb-4">
+            <div class="card">
+              <div class="card-header">
+                <h5>{{ visitor.visitor_name }}</h5>
+                <small class="text-muted">Student: {{ visitor.student.user.get_full_name }}</small>
+              </div>
+              <div class="card-body">
+                <p><strong>Phone:</strong> {{ visitor.phone_number }}</p>
+                <p><strong>Date:</strong> {{ visitor.visiting_date|date:"M d, Y" }}</p>
+                <p><strong>Time:</strong> {{ visitor.expected_entry_time|time:"H:i" }} - {{ visitor.expected_exit_time|time:"H:i" }}</p>
+                <p><strong>Purpose:</strong> {{ visitor.purpose }}</p>
+                <div class="d-flex gap-2">
+                  <form method="post" action="{% url 'approve_visitor' visitor.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">
+                      <i class="fas fa-check"></i> Approve
+                    </button>
+                  </form>
+                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal{{ visitor.pk }}">
+                    <i class="fas fa-times"></i> Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="alert alert-info">No pending visitor requests.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Approved Requests -->
+    <div class="tab-pane fade" id="approved" role="tabpanel">
+      <div class="row mt-4">
+        {% for visitor in approved %}
+          <div class="col-md-6 mb-4">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h5>{{ visitor.visitor_name }}</h5>
+                <small>Student: {{ visitor.student.user.get_full_name }}</small>
+              </div>
+              <div class="card-body">
+                <p><strong>Phone:</strong> {{ visitor.phone_number }}</p>
+                <p><strong>Date:</strong> {{ visitor.visiting_date|date:"M d, Y" }}</p>
+                <p><strong>Time:</strong> {{ visitor.expected_entry_time|time:"H:i" }} - {{ visitor.expected_exit_time|time:"H:i" }}</p>
+                <p><strong>Purpose:</strong> {{ visitor.purpose }}</p>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="alert alert-info">No approved visitor requests.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Rejected Requests -->
+    <div class="tab-pane fade" id="rejected" role="tabpanel">
+      <div class="row mt-4">
+        {% for visitor in rejected %}
+          <div class="col-md-6 mb-4">
+            <div class="card border-danger">
+              <div class="card-header bg-danger text-white">
+                <h5>{{ visitor.visitor_name }}</h5>
+                <small>Student: {{ visitor.student.user.get_full_name }}</small>
+              </div>
+              <div class="card-body">
+                <p><strong>Phone:</strong> {{ visitor.phone_number }}</p>
+                <p><strong>Date:</strong> {{ visitor.visiting_date|date:"M d, Y" }}</p>
+                <p><strong>Time:</strong> {{ visitor.expected_entry_time|time:"H:i" }} - {{ visitor.expected_exit_time|time:"H:i" }}</p>
+                <p><strong>Purpose:</strong> {{ visitor.purpose }}</p>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="alert alert-info">No rejected visitor requests.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modals -->
+{% for visitor in pending %}
+<div class="modal fade" id="rejectModal{{ visitor.pk }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reject Visitor Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'reject_visitor' visitor.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p>Are you sure you want to reject the visitor request for <strong>{{ visitor.visitor_name }}</strong>?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Reject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

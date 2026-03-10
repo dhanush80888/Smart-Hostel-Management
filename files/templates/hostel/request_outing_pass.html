@@ -1,0 +1,141 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+
+{% block title %}Request Outing Pass - Smart Hostel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">📋 Request Outing Pass</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_from_date" class="form-label fw-bold">From Date <span class="text-danger">*</span></label>
+                            {{ form.from_date }}
+                            {% if form.from_date.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.from_date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_to_date" class="form-label fw-bold">To Date <span class="text-danger">*</span></label>
+                            {{ form.to_date }}
+                            {% if form.to_date.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.to_date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_days_requested" class="form-label fw-bold">Number of Days <span class="text-danger">*</span></label>
+                            {{ form.days_requested }}
+                            <small class="form-text text-muted d-block mt-1">Enter number of days for the outing</small>
+                            {% if form.days_requested.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.days_requested.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_reason" class="form-label fw-bold">Reason for Outing <span class="text-danger">*</span></label>
+                            {{ form.reason }}
+                            <small class="form-text text-muted d-block mt-1">Please provide details about your outing</small>
+                            {% if form.reason.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.reason.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_guardian_email" class="form-label fw-bold">Guardian Email <span class="text-danger">*</span></label>
+                                    {{ form.guardian_email }}
+                                    <small class="form-text text-muted d-block mt-1">Notification will be sent here</small>
+                                    {% if form.guardian_email.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.guardian_email.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_guardian_phone" class="form-label fw-bold">Guardian Phone</label>
+                                    {{ form.guardian_phone }}
+                                    <small class="form-text text-muted d-block mt-1">Optional contact number</small>
+                                    {% if form.guardian_phone.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.guardian_phone.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Important:</strong> Your request will be reviewed by the hostel admin. 
+                            A notification will be sent to your guardian once your request is processed.
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Requests -->
+            <div class="card shadow-lg border-0 mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📜 Your Recent Requests</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'my_outing_passes' %}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-history"></i> View All My Passes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .card {
+        border-radius: 0.75rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+{% endblock %}

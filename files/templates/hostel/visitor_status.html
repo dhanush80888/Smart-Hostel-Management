@@ -1,0 +1,55 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-users"></i> My Visitor Requests</h2>
+    <a href="{% url 'visitor_register' %}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Register New Visitor
+    </a>
+  </div>
+
+  <div class="row">
+    {% for visitor in visitors %}
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ visitor.visitor_name }}</h5>
+            <span class="badge 
+              {% if visitor.status == 'pending' %}bg-warning
+              {% elif visitor.status == 'approved' %}bg-success
+              {% else %}bg-danger{% endif %}">
+              {{ visitor.get_status_display }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-sm-6">
+                <p><strong>Phone:</strong> {{ visitor.phone_number }}</p>
+                <p><strong>Date:</strong> {{ visitor.visiting_date|date:"M d, Y" }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p><strong>Entry:</strong> {{ visitor.expected_entry_time|time:"H:i" }}</p>
+                <p><strong>Exit:</strong> {{ visitor.expected_exit_time|time:"H:i" }}</p>
+              </div>
+            </div>
+            <p><strong>Purpose:</strong> {{ visitor.purpose }}</p>
+            <small class="text-muted">Requested on: {{ visitor.created_at|date:"M d, Y H:i" }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="fas fa-users fa-4x text-muted mb-3"></i>
+          <h4 class="text-muted">No Visitor Requests</h4>
+          <p class="text-muted">You haven't registered any visitors yet.</p>
+          <a href="{% url 'visitor_register' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Register Your First Visitor
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

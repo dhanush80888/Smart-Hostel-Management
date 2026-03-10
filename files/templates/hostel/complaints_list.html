@@ -1,0 +1,36 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Complaints</h2>
+  <div class="mt-4">
+    {% for complaint in complaints %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ complaint.title }}</h5>
+          <p class="card-text">{{ complaint.description }}</p>
+          <p class="text-muted">
+            {% if not complaint.anonymous %}
+              <strong>By:</strong> {{ complaint.student.user.get_full_name }}<br>
+            {% else %}
+              <strong>Submitted anonymously</strong><br>
+            {% endif %}
+            <strong>Status:</strong> <span class="badge bg-info">{{ complaint.get_status_display }}</span><br>
+            <strong>Date:</strong> {{ complaint.created_at|date:"Y-m-d H:i" }}
+          </p>
+          {% if complaint.response %}
+            <div class="alert alert-info">
+              <strong>Response:</strong> {{ complaint.response }}
+            </div>
+          {% endif %}
+          {% if user.is_staff %}
+            <a href="{% url 'update_complaint' complaint.pk %}" class="btn btn-sm btn-warning">Update Status</a>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <p>No complaints.</p>
+    {% endfor %}
+  </div>
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

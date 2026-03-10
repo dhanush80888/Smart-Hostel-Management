@@ -1,0 +1,37 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="display-5">Smart Hostel Management</h1>
+  <p class="lead">Allocate rooms, track fees, and resolve complaints — all in one place.</p>
+  <p>
+    <a class="btn btn-primary btn-lg me-2" href="{% url 'signup' %}">Get Started</a>
+    <a class="btn btn-outline-primary btn-lg" href="{% url 'login' %}">Login</a>
+  </p>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Room Allocation</h5>
+        <p class="card-text">Admin can allocate rooms quickly and set rents.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Fee Tracking</h5>
+        <p class="card-text">Students see outstanding fees and can mark payments.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Complaints</h5>
+        <p class="card-text">Submit complaints and track resolution status.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
