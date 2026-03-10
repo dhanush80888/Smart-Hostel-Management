@@ -1,0 +1,22 @@
+{% extends 'hostel/base.html' %}
+
+{% block content %}
+<h2>Food Feedback</h2>
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary">Submit</button>
+</form>
+
+{% if past %}
+    <h5>Recent Feedback</h5>
+    <ul class="list-group">
+        {% for fb in past %}
+            <li class="list-group-item">
+                {{ fb.date }} - {{ fb.get_meal_type_display }}: {{ fb.rating }} stars<br>
+                {{ fb.comment|linebreaksbr }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

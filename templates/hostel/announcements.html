@@ -1,0 +1,32 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Announcements</h2>
+{% if user.is_staff %}
+  <a href="{% url 'create_announcement' %}" class="btn btn-primary mb-3">New Announcement</a>
+{% endif %}
+<form method="get" class="mb-2">
+  <select name="category" class="form-select w-auto d-inline">
+    <option value="">All</option>
+    <option value="holidays">Holidays</option>
+    <option value="maintenance">Maintenance</option>
+    <option value="rules">Hostel Rules</option>
+    <option value="events">Events</option>
+  </select>
+  <button class="btn btn-secondary btn-sm">Filter</button>
+</form>
+<ul class="list-group">
+  {% for ann in announcements %}
+    <li class="list-group-item">
+      <h5>{{ ann.title }} <small class="text-muted">[{{ ann.get_category_display }}]</small></h5>
+      <p>{{ ann.message }}</p>
+      <small>Posted by {{ ann.posted_by }} on {{ ann.created_at|date:'M d, Y' }}
+      {% if ann.expiry_date %} - expires {{ ann.expiry_date }}{% endif %}</small>
+      {% if ann.attachment %}
+        <div><a href="{{ ann.attachment.url }}" target="_blank">Download attachment</a></div>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li class="list-group-item">No announcements.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

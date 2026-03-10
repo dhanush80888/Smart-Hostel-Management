@@ -1,0 +1,802 @@
+/* Professional styles for the hostel application */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+}
+
+h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.5s ease-out;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Statistics Cards */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 3s infinite;
+}
+
+.stats-card h5 {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.stats-card h5 i {
+    color: black;
+}
+
+.stats-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stats-card.occupied {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.stats-card.students {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.stats-card.complaints {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.stats-card.revenue {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.stats-card.capacity {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+}
+
+/* Quick Actions Sidebar */
+.quick-actions-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.quick-actions-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid #e9ecef;
+}
+
+.quick-actions-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    padding: 15px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-actions-card .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.quick-actions-card .card-header h5 {
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.quick-actions-card .card-header i {
+    margin-right: 8px;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    color: black;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: none;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+}
+
+/* Quick Actions Professional Styling */
+.quick-actions-card .btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-actions-card .btn i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    opacity: 0.9;
+    color: black;
+}
+
+.quick-actions-card .btn:hover i {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.quick-actions-card .btn-lg {
+    padding: 15px 25px;
+    font-size: 1.05rem;
+}
+
+.quick-actions-card .btn-lg i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+/* Enhanced button hover effects */
+.quick-actions-card .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.3s ease;
+}
+
+.quick-actions-card .btn:hover::after {
+    transform: translateY(-50%) scale(1);
+}
+
+/* Student Dashboard Specific Styles */
+.welcome-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.welcome-header h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-header p {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* Stats Cards for Student */
+.stats-card.room-status {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.stats-card.total-due {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.stats-card.total-paid {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.stats-card.complaints-submitted {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.stats-card.complaints-submitted h5 i {
+    color: #212529;
+}
+
+/* Profile and Fee Cards */
+.profile-card .card-body {
+    padding: 25px;
+}
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.profile-item:last-child {
+    border-bottom: none;
+}
+
+.profile-item i {
+    font-size: 1.2rem;
+    color: #667eea;
+    margin-right: 15px;
+    width: 25px;
+    text-align: center;
+}
+
+.profile-item span {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.fee-card .card-body {
+    padding: 25px;
+}
+
+.fee-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.fee-item.total {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding-top: 20px;
+    border-top: 2px solid #dee2e6;
+}
+
+.fee-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Payments and Complaints Cards */
+.payments-card .card-body,
+.complaints-card .card-body {
+    padding: 20px;
+}
+
+.payment-item,
+.complaint-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.payment-item:last-child,
+.complaint-item:last-child {
+    margin-bottom: 0;
+}
+
+.complaint-item h6 {
+    margin-bottom: 5px;
+    color: #495057;
+}
+
+.complaint-item p {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+/* Quick Actions for Student */
+.quick-actions-card .card-body .row .col-md-2 {
+    margin-bottom: 15px;
+}
+
+.quick-actions-card .btn {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+.quick-actions-card .btn i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    margin-right: 0;
+    width: auto;
+}
+
+.quick-actions-card .btn:hover {
+    transform: translateY(-5px);
+}
+
+/* Animations */
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Individual button color schemes */
+.quick-actions-card .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.quick-actions-card .btn-success:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+    transform: translateX(5px);
+}
+
+.quick-actions-card .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+}
+
+.quick-actions-card .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #5a0fc8 100%);
+    transform: translateX(5px);
+}
+
+.quick-actions-card .btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+.quick-actions-card .btn-info:hover {
+    background: linear-gradient(135deg, #138496 0%, #5a32a3 100%);
+    transform: translateX(5px);
+}
+
+.quick-actions-card .btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    color: #212529;
+}
+
+.quick-actions-card .btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #e8680d 100%);
+    transform: translateX(5px);
+}
+
+.quick-actions-card .btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.quick-actions-card .btn-secondary:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #383d41 100%);
+    transform: translateX(5px);
+}
+
+/* Complaints Section */
+.complaints-card .card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.complaint-item {
+    border-left: 4px solid #667eea;
+    padding-left: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.complaint-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.badge {
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Animations */
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Rooms Page Professional Styling */
+.rooms-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px 0;
+}
+
+.rooms-header h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.rooms-header h2 i {
+    color: #667eea;
+    margin-right: 10px;
+}
+
+.rooms-header p {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+.room-card {
+    height: 100%;
+    perspective: 1000px;
+}
+
+.room-card-inner {
+    height: 100%;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+}
+
+.room-card-inner:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.room-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.room-card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.room-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.room-card-header h5 i {
+    margin-right: 8px;
+    opacity: 0.9;
+}
+
+.room-status {
+    margin-top: 10px;
+}
+
+.room-status .badge {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.room-card-body {
+    padding: 25px;
+    background: #ffffff;
+}
+
+.room-specs {
+    margin-bottom: 20px;
+}
+
+.spec-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.spec-item:last-child {
+    border-bottom: none;
+}
+
+.spec-item i {
+    color: #667eea;
+    font-size: 1.1rem;
+    width: 25px;
+    margin-right: 12px;
+    text-align: center;
+}
+
+.spec-item span {
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.spec-item strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.room-availability {
+    margin-bottom: 25px;
+}
+
+.availability-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.availability-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.room-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-view-details, .btn-book-now {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-view-details {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.btn-view-details:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #383d41 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-book-now {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-book-now:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-view-details i, .btn-book-now i {
+    margin-right: 5px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(248, 249, 250, 0.5);
+    border-radius: 15px;
+    margin: 40px 0;
+}
+
+/* Responsive Design for Rooms */
+@media (max-width: 768px) {
+    .rooms-header h2 {
+        font-size: 2rem;
+    }
+
+    .room-card-body {
+        padding: 20px;
+    }
+
+    .room-actions {
+        flex-direction: column;
+    }
+
+    .btn-view-details, .btn-book-now {
+        width: 100%;
+    }
+}

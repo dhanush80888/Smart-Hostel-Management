@@ -1,0 +1,9 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Report Lost Item</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary">Report</button>
+</form>
+{% endblock %}

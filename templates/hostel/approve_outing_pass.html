@@ -1,0 +1,132 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+
+{% block title %}Approve Outing Pass - Smart Hostel Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">✅ Approve Outing Pass</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Approval Notice:</strong> When you approve this pass, an automatic notification email will be sent to the guardian.
+                    </div>
+
+                    <!-- Student Details -->
+                    <h5 class="mb-3 fw-bold">📋 Request Details</h5>
+                    <div class="row mb-4 p-3 bg-light rounded">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong>Student Name:</strong><br>
+                                {{ outing.student.user.get_full_name }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Username:</strong><br>
+                                {{ outing.student.user.username }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Roll Number:</strong><br>
+                                {{ outing.student.roll_number }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong>Email:</strong><br>
+                                {{ outing.student.user.email }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Guardian Email:</strong><br>
+                                <span class="badge bg-primary">{{ outing.guardian_email }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Guardian Phone:</strong><br>
+                                {{ outing.guardian_phone|default:"Not provided" }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Outing Details -->
+                    <h5 class="mb-3 fw-bold">📅 Outing Details</h5>
+                    <div class="row mb-4 p-3 bg-light rounded">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong>From Date:</strong><br>
+                                <span class="badge bg-info">{{ outing.from_date|date:"d M Y (l)" }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>To Date:</strong><br>
+                                <span class="badge bg-info">{{ outing.to_date|date:"d M Y (l)" }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong>Duration:</strong><br>
+                                <span class="badge bg-warning text-dark">{{ outing.days_requested }} day(s)</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Requested On:</strong><br>
+                                <small class="text-muted">{{ outing.requested_on|date:"d M Y H:i" }}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Reason -->
+                    <h5 class="mb-3 fw-bold">📝 Reason for Outing</h5>
+                    <div class="alert alert-light p-3 rounded mb-4">
+                        <p class="mb-0">{{ outing.reason }}</p>
+                    </div>
+
+                    <!-- Notification Preview -->
+                    <h5 class="mb-3 fw-bold">📧 Guardian Notification Preview</h5>
+                    <div class="alert alert-secondary p-3 rounded mb-4">
+                        <strong>Email Subject:</strong> Outing Pass Approved - {{ outing.student.user.get_full_name }}<br><br>
+                        <strong>Message Preview:</strong>
+                        <div class="bg-white p-2 rounded mt-2" style="font-size: 0.9rem; line-height: 1.6;">
+                            <p>Dear Guardian/Parent,</p>
+                            <p>We are pleased to inform you that your ward <strong>{{ outing.student.user.get_full_name }}</strong> has been granted permission for an outing pass.</p>
+                            <p><strong>Details:</strong></p>
+                            <ul class="mb-3">
+                                <li>From Date: {{ outing.from_date|date:"d-m-Y" }}</li>
+                                <li>To Date: {{ outing.to_date|date:"d-m-Y" }}</li>
+                                <li>Duration: {{ outing.days_requested }} day(s)</li>
+                                <li>Reason: {{ outing.reason|truncatewords:20 }}</li>
+                            </ul>
+                            <p>Your ward is permitted to leave the hostel during the specified period. Please ensure they follow all hostel rules and maintain safety.</p>
+                            <p>Best Regards,<br>Smart Hostel Management System</p>
+                        </div>
+                    </div>
+
+                    <!-- Approval Form -->
+                    <form method="POST" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="fas fa-check-circle"></i> Confirm Approval & Send Notification
+                            </button>
+                            <a href="{% url 'admin_outing_requests' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.75rem;
+    }
+    
+    .badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

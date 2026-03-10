@@ -1,0 +1,15 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>My Leave Requests</h2>
+<ul class="list-group">
+  {% for leave in leaves %}
+    <li class="list-group-item">
+      <strong>{{ leave.start_date }} to {{ leave.end_date }}</strong> : {{ leave.reason }}
+      <br>
+      <small>Status: {{ leave.get_status_display }}</small>
+    </li>
+  {% empty %}
+    <li class="list-group-item">No leave requests submitted.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

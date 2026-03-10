@@ -1,0 +1,77 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="rooms-header">
+    <h2><i class="fas fa-building"></i> Available Rooms</h2>
+    <p class="text-muted">Choose from our premium hostel accommodations</p>
+  </div>
+
+  <div class="row">
+    {% for room in rooms %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="room-card">
+          <div class="card room-card-inner">
+            <div class="card-header room-card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-door-closed"></i> Room {{ room.room_no }}
+              </h5>
+              <div class="room-status">
+                {% if room.occupants_count == 0 %}
+                  <span class="badge bg-success"><i class="fas fa-check-circle"></i> Available</span>
+                {% elif room.occupants_count < room.capacity %}
+                  <span class="badge bg-warning"><i class="fas fa-clock"></i> Partially Occupied</span>
+                {% else %}
+                  <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Full</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="card-body room-card-body">
+              <div class="room-specs">
+                <div class="spec-item">
+                  <i class="fas fa-users"></i>
+                  <span><strong>{{ room.capacity }}</strong> Person Capacity</span>
+                </div>
+                <div class="spec-item">
+                  <i class="fas fa-user-friends"></i>
+                  <span><strong>{{ room.occupants_count }}</strong> Current Occupants</span>
+                </div>
+                <div class="spec-item">
+                  <i class="fas fa-rupee-sign"></i>
+                  <span><strong>₹{{ room.rent }}</strong> per month</span>
+                </div>
+              </div>
+
+              <div class="room-availability">
+                <div class="availability-bar">
+                  <div class="availability-fill" style="width: {{ room.availability_percentage }}%"></div>
+                </div>
+                <small class="text-muted">
+                  {{ room.spots_available }} spot{{ room.spots_available|pluralize }} available
+                </small>
+              </div>
+
+              <div class="room-actions">
+                <a href="{% url 'room_detail' room.pk %}" class="btn btn-view-details">
+                  <i class="fas fa-eye"></i> View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="empty-state">
+          <i class="fas fa-building fa-4x text-muted mb-3"></i>
+          <h4 class="text-muted">No Rooms Available</h4>
+          <p class="text-muted">There are currently no active rooms in the system.</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

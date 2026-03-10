@@ -1,0 +1,186 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║           SMART HOSTEL MANAGEMENT - LOGIN & ROLE-BASED REDIRECT FLOW           ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          HOME PAGE                                              │
+│                    http://127.0.0.1:8000/                                       │
+│                                                                                  │
+│              "Welcome to Smart Hostel Management System"                        │
+│                                                                                  │
+│                    [Login Button]  [Sign Up Button]                            │
+└──────────────────────────────┬──────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          LOGIN PAGE                                             │
+│                    http://127.0.0.1:8000/accounts/login/                       │
+│                                                                                  │
+│                  ┌────────────────────────────┐                                 │
+│                  │  Username: [_____________]  │                                 │
+│                  │  Password: [_____________]  │                                 │
+│                  │          [LOGIN BUTTON]     │                                 │
+│                  └────────────────────────────┘                                 │
+└──────────────────────────────┬──────────────────────────────────────────────────┘
+                               │
+                ┌──────────────┴──────────────┐
+                │                             │
+                ▼                             ▼
+    ╔═══════════════════════╗     ╔═══════════════════════╗
+    │  ADMIN LOGIN          │     │  STUDENT LOGIN        │
+    │  username: admin      │     │  username: student1   │
+    │  password: admin123   │     │  password: pass123    │
+    ╚═════════╤═════════════╝     ╚═════════╤═════════════╝
+              │                             │
+              ▼                             ▼
+    ╔═══════════════════════════════╗    ╔═══════════════════════════════╗
+    │   AUTO-REDIRECT TO:           │    │   AUTO-REDIRECT TO:           │
+    │  /admin-dashboard/            │    │  /student-dashboard/          │
+    ╚═════════╤═════════════════════╝    ╚═════════╤═════════════════════╝
+              │                                     │
+              ▼                                     ▼
+┌─────────────────────────────────┐    ┌─────────────────────────────────┐
+│   ADMIN DASHBOARD               │    │   STUDENT DASHBOARD             │
+│   ==================            │    │   ==================             │
+│                                 │    │                                 │
+│  ┌──────────────────────────┐   │    │  ┌──────────────────────────┐   │
+│  │ Total Rooms: 5           │   │    │  │ Profile Information     │   │
+│  │ Occupied: 3              │   │    │  │ • Name: John Doe        │   │
+│  │ Students: 5              │   │    │  │ • Roll: CS001           │   │
+│  │ Complaints: 3            │   │    │  │ • Room: Room 101        │   │
+│  │ Revenue: ₹5,000 ✓        │   │    │  │ • Email: john@example.. │   │
+│  └──────────────────────────┘   │    │  └──────────────────────────┘   │
+│                                 │    │                                 │
+│  ┌──────────────────────────┐   │    │  ┌──────────────────────────┐   │
+│  │ Recent Complaints        │   │    │  │ Fee Details             │   │
+│  │ • Water leakage (Open)   │   │    │  │ • Total Due: ₹10,000    │   │
+│  │ • Broken window (Open)   │   │    │  │ • Paid: ₹5,000 ✓ (DB)  │   │
+│  │ • Internet issue (In Pr.)│   │    │  │ • Outstanding: ₹5,000   │   │
+│  └──────────────────────────┘   │    │  │ [PAY FEES BUTTON]       │   │
+│                                 │    │  └──────────────────────────┘   │
+│  Quick Actions:                 │    │                                 │
+│  [View Rooms] [Allocate]        │    │  ┌──────────────────────────┐   │
+│  [Complaints] [Django Admin]    │    │  │ Recent Payments ✓ (DB)  │   │
+│  [+ More...]                    │    │  │ • ₹500 on 24 Jan        │   │
+│                                 │    │  │ • ₹3,000 on 23 Jan      │   │
+│                                 │    │  │ [ADD PAYMENT]           │   │
+│                                 │    │  └──────────────────────────┘   │
+│                                 │    │                                 │
+│                                 │    │  ┌──────────────────────────┐   │
+│                                 │    │  │ Complaints              │   │
+│                                 │    │  │ • Water issue (Open)    │   │
+│                                 │    │  │ [SUBMIT NEW]            │   │
+│                                 │    │  └──────────────────────────┘   │
+│                                 │    │                                 │
+│                                 │    │  Quick Actions:                 │
+│                                 │    │  [Browse] [Pay] [Complain]     │
+│                                 │    │  [View] [+ More...]            │
+└─────────────────────────────────┘    └─────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════════
+
+                            PAYMENT FLOW (STUDENT)
+
+  Student Dashboard
+         │
+         ▼
+  [PAY FEES BUTTON]
+         │
+         ▼
+  ┌────────────────────────────────────────┐
+  │ Payment Form                           │
+  │ ├─ Amount: [_______________]           │
+  │ ├─ Method: [Online ▼]                  │
+  │ └─ [RECORD PAYMENT BUTTON]             │
+  └─────────┬──────────────────────────────┘
+            │
+            ▼
+  ┌────────────────────────────────────────┐
+  │ DATABASE UPDATE ✓                      │
+  │ ├─ Payment Record Created              │
+  │ │  └─ Amount: ₹500                     │
+  │ │     Date: 2026-01-24 10:30           │
+  │ │     Method: Online                   │
+  │ ├─ StudentProfile Updated              │
+  │ │  └─ fees_paid: ₹5,000 → ₹5,500 ✓    │
+  │ │     outstanding: Recalculated ✓      │
+  │ └─ [SUCCESS MESSAGE]                   │
+  └─────────┬──────────────────────────────┘
+            │
+            ▼
+  Student Dashboard Updated ✓
+  • Fees Paid: ₹5,500 (NEW)
+  • Outstanding: ₹4,500 (NEW)
+  • Payment History: Shows ₹500 (NEW)
+
+═════════════════════════════════════════════════════════════════════════════════
+
+                        NAVIGATION AFTER LOGIN
+
+ADMIN AFTER LOGIN:
+  └─ http://127.0.0.1:8000/dashboard/ → Redirects to admin dashboard
+  └─ http://127.0.0.1:8000/admin-dashboard/ → Admin Dashboard
+  └─ http://127.0.0.1:8000/allocate/ → Allocate Rooms
+  └─ http://127.0.0.1:8000/complaints/ → View Complaints
+  └─ http://127.0.0.1:8000/admin/ → Django Admin
+  └─ [Logout] → Redirects to login
+
+STUDENT AFTER LOGIN:
+  └─ http://127.0.0.1:8000/dashboard/ → Redirects to student dashboard
+  └─ http://127.0.0.1:8000/student-dashboard/ → Student Dashboard
+  └─ http://127.0.0.1:8000/pay/ → Make Payment
+  └─ http://127.0.0.1:8000/complaints/new/ → Submit Complaint
+  └─ http://127.0.0.1:8000/complaints/ → View Complaints
+  └─ http://127.0.0.1:8000/rooms/ → Browse Rooms
+  └─ [Logout] → Redirects to login
+
+═════════════════════════════════════════════════════════════════════════════════
+
+                        DATABASE SCHEMA
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  User (Django Built-in)                   StudentProfile                    │
+│  ├─ id                                     ├─ id                            │
+│  ├─ username ← LOGIN                       ├─ user_id → User               │
+│  ├─ password (hashed)                      ├─ roll_number                   │
+│  ├─ email                                  ├─ room_id → Room               │
+│  ├─ first_name                             ├─ fees_due (Decimal) ✓         │
+│  ├─ last_name                              ├─ fees_paid (Decimal) ✓ UPDATED│
+│  ├─ is_staff (0=Student, 1=Admin)          ├─ joined_on                    │
+│  ├─ is_active                              └─ ...                          │
+│  └─ ...                                                                      │
+│                                                                              │
+│  Room                                      Payment                          │
+│  ├─ id                                     ├─ id                            │
+│  ├─ room_no (Unique)                       ├─ student_id → StudentProfile  │
+│  ├─ capacity                               ├─ amount (Decimal) ✓ SAVED     │
+│  ├─ rent (Monthly)                         ├─ paid_on (DateTime) ✓ AUTO    │
+│  ├─ is_active                              ├─ method (online/offline/cash) │
+│  └─ ...                                    └─ ...                          │
+│                                                                              │
+│  Complaint                                                                   │
+│  ├─ id                                                                       │
+│  ├─ student_id → StudentProfile                                             │
+│  ├─ title                                                                    │
+│  ├─ description                                                              │
+│  ├─ status (open/in_progress/resolved)                                      │
+│  ├─ response (admin reply)                                                   │
+│  ├─ created_at                                                               │
+│  ├─ updated_at                                                               │
+│  └─ anonymous (bool)                                                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════════
+
+✅ EVERYTHING WORKING:
+   • Admin & Student separate pages ✓
+   • Different credentials ✓
+   • Role-based redirect ✓
+   • Payment recording to database ✓
+   • Fee tracking with Decimal precision ✓
+   • Payment history visible ✓
+   • Complete complaint system ✓
+
+═════════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,29 @@
+{% extends 'hostel/base.html' %}
+
+{% block content %}
+<h2>Weekly Mess Menu</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>Breakfast</th>
+            <th>Lunch</th>
+            <th>Snacks</th>
+            <th>Dinner</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in weekly_menu %}
+            <tr>
+                <td>{{ m.get_day_display }}</td>
+                <td>{{ m.breakfast|linebreaksbr }}</td>
+                <td>{{ m.lunch|linebreaksbr }}</td>
+                <td>{{ m.snacks|linebreaksbr }}</td>
+                <td>{{ m.dinner|linebreaksbr }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5">No menu available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

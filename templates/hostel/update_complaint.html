@@ -1,0 +1,39 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Update Complaint</h2>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ complaint.title }}</h5>
+      <p class="card-text">{{ complaint.description }}</p>
+      <p class="text-muted">
+        {% if not complaint.anonymous %}
+          <strong>By:</strong> {{ complaint.student.user.get_full_name }}<br>
+        {% else %}
+          <strong>Submitted anonymously</strong><br>
+        {% endif %}
+        <strong>Current Status:</strong> <span class="badge bg-info">{{ complaint.get_status_display }}</span><br>
+        <strong>Date:</strong> {{ complaint.created_at|date:"Y-m-d H:i" }}
+      </p>
+      {% if complaint.response %}
+        <div class="alert alert-info">
+          <strong>Current Response:</strong> {{ complaint.response }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_status" class="form-label">Status</label>
+      {{ form.status }}
+    </div>
+    <div class="mb-3">
+      <label for="id_response" class="form-label">Response</label>
+      {{ form.response }}
+    </div>
+    <button type="submit" class="btn btn-primary">Update Complaint</button>
+    <a href="{% url 'complaints' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Approve Leave</h2>
+<div class="card mb-3">
+  <div class="card-body">
+    <p><strong>Student:</strong> {{ leave.student }}</p>
+    <p><strong>From:</strong> {{ leave.start_date }} <strong>To:</strong> {{ leave.end_date }}</p>
+    <p><strong>Reason:</strong> {{ leave.reason }}</p>
+  </div>
+</div>
+<form method="post">
+  {% csrf_token %}
+  <button name="action" value="parent" class="btn btn-info">Parent Approve</button>
+  <button name="action" value="warden" class="btn btn-success">Warden Approve</button>
+  <button name="action" value="reject" class="btn btn-danger">Reject</button>
+</form>
+{% endblock %}

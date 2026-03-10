@@ -1,0 +1,26 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Manage Emergency Alerts</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Student</th>
+      <th>Room</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in alerts %}
+      <tr>
+        <td>{{ a.created_at|date:'M d, Y H:i' }}</td>
+        <td>{{ a.student }}</td>
+        <td>{{ a.room_number }}</td>
+        <td>{{ a.message }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">No alerts.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Emergency Alert</h2>
+<p>Use this form to send an instant alert to hostel administration.</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-danger">Send Alert</button>
+</form>
+{% endblock %}

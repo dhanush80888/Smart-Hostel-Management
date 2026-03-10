@@ -1,0 +1,42 @@
+{% extends 'hostel/base.html' %}
+
+{% block content %}
+<h2>Feedback Analytics</h2>
+
+<h4>Rating Distribution</h4>
+<canvas id="ratingChart" width="400" height="200"></canvas>
+
+<h4 class="mt-4">Average Rating by Meal</h4>
+<table class="table">
+    <thead><tr><th>Meal</th><th>Average Rating</th><th>Responses</th></tr></thead>
+    <tbody>
+        {% for m in meal_summary %}
+            <tr>
+                <td>{{ m.meal_type }}</td>
+                <td>{{ m.avg_rating|floatformat:1 }}</td>
+                <td>{{ m.count }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ratingData = {
+        labels: [{% for r in rating_summary %} '{{ r.rating }}', {% endfor %}],
+        datasets: [{
+            label: 'Number of responses',
+            data: [{% for r in rating_summary %} {{ r.count }}, {% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+    const config = {
+        type: 'bar',
+        data: ratingData,
+        options: { scales: { y: { beginAtZero: true, precision:0 } } }
+    };
+    new Chart(document.getElementById('ratingChart'), config);
+</script>
+{% endblock %}

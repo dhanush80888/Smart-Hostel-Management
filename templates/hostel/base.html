@@ -1,0 +1,75 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Hostel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'hostel/css/style.css' %}" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">SmartHostel</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav me-auto">
+            {% if not user.is_staff %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'rooms' %}">Rooms</a></li>
+            {% endif %}
+            {% if user.is_authenticated %}
+              {% if not user.is_staff %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'complaints' %}">Complaints</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'menu' %}">Weekly Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'attendance' %}">Attendance</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'feedback' %}">Feedback</a></li>
+              {% endif %}
+              {% if not user.is_staff %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'submit_complaint' %}">New Complaint</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'make_payment' %}">Pay Fee</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'request_outing_pass' %}">Outing Pass</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'my_outing_passes' %}">My Outing Passes</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'visitor_register' %}">Register Visitor</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'visitor_status' %}">My Visitors</a></li>
+              {% endif %}
+              {% if user.is_staff %}
+                {# visitor requests and security dashboard removed from navbar per UX request #}
+                <li class="nav-item"><a class="nav-link" href="{% url 'attendance_report' %}">Attendance Report</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'feedback_report' %}">Feedback Report</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+              {% endif %}
+            {% endif %}
+          </ul>
+          <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+              <li class="nav-item"><span class="nav-link">Hi, {{ user.username }}</span></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Sign up</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      {% if messages %}
+        {% for m in messages %}
+          <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">
+            {{ m }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'hostel/js/main.js' %}"></script>
+  </body>
+</html>

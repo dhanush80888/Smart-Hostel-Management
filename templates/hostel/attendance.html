@@ -1,0 +1,21 @@
+{% extends 'hostel/base.html' %}
+
+{% block content %}
+<h2>Meal Attendance ({{ today }})</h2>
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary">Submit</button>
+</form>
+
+{% if existing %}
+    <h5>Your attendance for today</h5>
+    <ul class="list-group">
+        {% for a in existing %}
+            <li class="list-group-item">
+                {{ a.get_meal_type_display }} - {{ a.get_status_display }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

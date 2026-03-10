@@ -1,0 +1,107 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <h2><i class="fas fa-shield-alt"></i> Security Dashboard</h2>
+  <p class="text-muted">Visitor Management Overview</p>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card bg-primary text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-users fa-2x mb-2"></i>
+          <h3>{{ total_visitors_today }}</h3>
+          <p class="mb-0">Total Visitors Today</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card bg-warning text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-clock fa-2x mb-2"></i>
+          <h3>{{ pending_approvals }}</h3>
+          <p class="mb-0">Pending Approvals</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card bg-success text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-check-circle fa-2x mb-2"></i>
+          <h3>{{ approved_visitors }}</h3>
+          <p class="mb-0">Approved Today</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-tasks"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <a href="{% url 'admin_visitor_requests' %}" class="btn btn-primary btn-lg w-100 mb-3">
+            <i class="fas fa-clipboard-list"></i> Manage Visitor Requests
+          </a>
+          <a href="{% url 'visitor_log' %}" class="btn btn-success btn-lg w-100">
+            <i class="fas fa-clipboard-check"></i> Visitor Entry/Exit Log
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-search"></i> Search & Filter</h5>
+        </div>
+        <div class="card-body">
+          <form method="get" action="{% url 'visitor_log' %}">
+            <div class="mb-3">
+              <label for="search_date" class="form-label">Filter by Date</label>
+              <input type="date" class="form-control" id="search_date" name="date" value="{{ today }}">
+            </div>
+            <button type="submit" class="btn btn-outline-primary w-100">
+              <i class="fas fa-filter"></i> Apply Filter
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header">
+      <h5><i class="fas fa-history"></i> Recent Activity (Today)</h5>
+    </div>
+    <div class="card-body">
+      {% for log in recent_logs %}
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+          <div>
+            <strong>{{ log.visitor.visitor_name }}</strong>
+            <br><small class="text-muted">Student: {{ log.visitor.student.user.get_full_name }}</small>
+          </div>
+          <div class="text-end">
+            {% if log.entry_time %}
+              <small class="text-success">
+                <i class="fas fa-sign-in-alt"></i> {{ log.entry_time|time:"H:i" }}
+              </small>
+            {% endif %}
+            {% if log.exit_time %}
+              <br><small class="text-danger">
+                <i class="fas fa-sign-out-alt"></i> {{ log.exit_time|time:"H:i" }}
+              </small>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted text-center py-3">No recent activity for today.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'hostel/base.html' %}
+
+{% block content %}
+<h2>Manage Weekly Menu</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Breakfast</th>
+                <th>Lunch</th>
+                <th>Snacks</th>
+                <th>Dinner</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in formset %}
+                <tr>
+                    <td>{{ form.day }}</td>
+                    <td>{{ form.breakfast }}</td>
+                    <td>{{ form.lunch }}</td>
+                    <td>{{ form.snacks }}</td>
+                    <td>{{ form.dinner }}</td>
+                    <td>{{ form.is_active }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn btn-success">Save changes</button>
+</form>
+{% endblock %}

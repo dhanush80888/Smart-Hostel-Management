@@ -1,0 +1,24 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Room {{ room.room_no }}</h2>
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Capacity:</strong> {{ room.capacity }} students</p>
+      <p><strong>Occupants:</strong> {{ room.occupants_count }}</p>
+      <p><strong>Rent:</strong> ₹{{ room.rent }}/month</p>
+      <h5>Current Occupants:</h5>
+      {% if occupants %}
+        <ul class="list-group">
+          {% for occupant in occupants %}
+            <li class="list-group-item">{{ occupant.user.get_full_name }} ({{ occupant.user.username }})</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No occupants currently.</p>
+      {% endif %}
+    </div>
+  </div>
+  <a href="{% url 'rooms' %}" class="btn btn-secondary mt-3">Back to Rooms</a>
+</div>
+{% endblock %}

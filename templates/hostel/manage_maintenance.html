@@ -1,0 +1,18 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<h2>Maintenance Requests</h2>
+<table class="table">
+  <thead><tr><th>Room</th><th>Issue</th><th>Status</th><th>Student</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for req in requests %}
+      <tr>
+        <td>{{ req.room_number }}</td>
+        <td>{{ req.get_issue_type_display }}</td>
+        <td>{{ req.get_status_display }}</td>
+        <td>{{ req.student.user.username }}</td>
+        <td><a href="{% url 'update_maintenance' req.pk %}" class="btn btn-sm btn-outline-primary">Edit</a></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

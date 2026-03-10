@@ -1,0 +1,30 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card text-center">
+        <div class="card-body" style="padding: 40px 20px;">
+          <h2 class="mb-4">✓ Logged Out Successfully</h2>
+          <p class="text-muted mb-4">You have been logged out from your account.</p>
+          
+          <div class="d-grid gap-2">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+              Login Again
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
+              Go to Home
+            </a>
+          </div>
+          
+          <hr class="my-4">
+          
+          <p class="small text-muted">
+            <strong>Note:</strong> Your session has been cleared. Please login again to access your account.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
