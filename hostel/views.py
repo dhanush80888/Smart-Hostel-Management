@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.db.models import Count, Sum, F, Avg
+from django.db.models import Count, Sum, F, Avg, Q
 from django.db import OperationalError
 from decimal import Decimal
 import random
@@ -18,7 +18,7 @@ from .models import (
     Announcement, MessMenu, Visitor, VisitorLog,
     WeeklyMenu, MealAttendance, FoodFeedback,
     MaintenanceRequest, EmergencyAlert, LeaveRequest,
-    LostItem, StudentID, ElectricityUsage,
+    LostItem, StudentID, ElectricityUsage, ChatMessage,
 )
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -88,19 +88,6 @@ def admin_dashboard(request):
     total_feedback = FoodFeedback.objects.count()
     total_attendance = MealAttendance.objects.count()
 
-    # Occupancy data (for chart)
-    occupancy_data = []
-    for room in Room.objects.filter(is_active=True):
-        occupancy_data.append({'room_no': room.room_no, 'percentage': int((room.occupants_count/room.capacity*100) if room.capacity>0 else 0)})
-
-    # Fee payment summary
-    payments = Payment.objects.values('student').annotate(total=Sum('amount'))
-    fee_chart_data = {'paid': payments.aggregate(total_paid=Sum('total'))['total_paid'] or 0,
-                      'due': StudentProfile.objects.aggregate(due=Sum(F('fees_due')-F('fees_paid')))['due'] or 0}
-
-    # Complaint stats over time (simple count)
-    complaint_stats = Complaint.objects.values('status').annotate(count=Count('id'))
-
     # Students currently on leave
     today = timezone.now().date()
     on_leave = LeaveRequest.objects.filter(start_date__lte=today, end_date__gte=today, status__in=['parent_approved','warder_approved']).count()
@@ -117,9 +104,6 @@ def admin_dashboard(request):
         'total_visitors_today': total_visitors_today,
         'total_feedback': total_feedback,
         'total_attendance': total_attendance,
-        'occupancy_data': occupancy_data,
-        'fee_chart_data': fee_chart_data,
-        'complaint_stats': list(complaint_stats),
         'on_leave': on_leave,
     }
     return render(request, 'hostel/admin_dashboard.html', context)
@@ -183,6 +167,45 @@ def feedback_report(request):
     })
 
 
+@user_passes_test(lambda u: u.is_staff)
+def analytics(request):
+    """Show analytics charts for room occupancy, fee payments, and complaints"""
+    # Occupancy data (for chart)
+    occupancy_data = []
+    rooms = Room.objects.filter(is_active=True)
+    for room in rooms:
+        percentage = 0
+        if room.capacity > 0:
+            percentage = int((room.occupants_count / room.capacity) * 100)
+        occupancy_data.append({'room_no': room.room_no, 'percentage': percentage})
+
+    # Fee payment summary
+    payments = Payment.objects.values('student').annotate(total=Sum('amount'))
+    total_paid = payments.aggregate(total_paid=Sum('total'))['total_paid'] or 0
+    
+    # Calculate total due more accurately
+    students = StudentProfile.objects.all()
+    total_due = 0
+    for student in students:
+        if student.fees_due and student.fees_paid:
+            total_due += student.fees_due - student.fees_paid
+        elif student.fees_due:
+            total_due += student.fees_due
+    
+    fee_chart_data = {'paid': float(total_paid), 'due': float(max(0, total_due))}
+
+    # Complaint stats
+    complaint_stats = list(Complaint.objects.values('status').annotate(count=Count('id')))
+
+    context = {
+        'occupancy_data': occupancy_data,
+        'fee_chart_data': fee_chart_data,
+        'complaint_stats': complaint_stats,
+        'now': timezone.now(),
+    }
+    return render(request, 'hostel/analytics.html', context)
+
+
 @login_required
 def student_dashboard(request):
     # Redirect staff to admin dashboard
@@ -198,7 +221,12 @@ def student_dashboard(request):
     payments = Payment.objects.filter(student=profile).order_by('-paid_on')[:5]
     complaints = Complaint.objects.filter(student=profile).order_by('-created_at')[:5]
     leave_requests = OutingPass.objects.filter(student=profile).order_by('-requested_on')[:5]
-    announcements = Announcement.objects.filter(is_active=True).order_by('-created_at')[:3]
+    announcements = Announcement.objects.filter(is_active=True)
+    # Filter by expiry for students
+    today = timezone.now().date()
+    announcements = announcements.filter(
+        Q(expiry_date__isnull=True) | Q(expiry_date__gte=today)
+    ).order_by('-created_at')[:5]
 
     # Get counts
     total_complaints = Complaint.objects.filter(student=profile).count()
@@ -812,14 +840,53 @@ def security_dashboard(request):
 
 @login_required
 def announcements_list(request):
-    if request.user.is_staff:
-        ann = Announcement.objects.filter(is_active=True)
-    else:
-        ann = Announcement.objects.filter(is_active=True, expiry_date__gte=timezone.now().date() if timezone.now().date() else None)
-        cat = request.GET.get('category')
-        if cat:
-            ann = ann.filter(category=cat)
-    return render(request, 'hostel/announcements.html', {'announcements': ann})
+    announcements = Announcement.objects.filter(is_active=True)
+    
+    # For students, filter by expiry date and target audience
+    if not request.user.is_staff:
+        today = timezone.now().date()
+        announcements = announcements.filter(
+            Q(expiry_date__isnull=True) | Q(expiry_date__gte=today)
+        )
+        # Filter by target audience
+        profile = request.user.studentprofile
+        announcements = announcements.filter(
+            Q(target_audience='all') |
+            Q(target_audience='block', target_block=profile.room.block if profile.room else '') |
+            Q(target_audience='room', target_room=profile.room.room_no if profile.room else '')
+        )
+    
+    # Search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        announcements = announcements.filter(
+            Q(title__icontains=search_query) | Q(message__icontains=search_query)
+        )
+    
+    # Filter by category
+    category = request.GET.get('category', '')
+    if category:
+        announcements = announcements.filter(category=category)
+    
+    # Filter by importance
+    important_only = request.GET.get('important', '')
+    if important_only:
+        announcements = announcements.filter(is_important=True)
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(announcements, 10)  # 10 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'announcements': page_obj,
+        'categories': Announcement.CATEGORY_CHOICES,
+        'search_query': search_query,
+        'selected_category': category,
+        'important_only': important_only,
+    }
+    return render(request, 'hostel/announcements.html', context)
 
 @user_passes_test(lambda u: u.is_staff)
 def create_announcement(request):
@@ -827,20 +894,46 @@ def create_announcement(request):
         form = AnnouncementForm(request.POST, request.FILES)
         if form.is_valid():
             ann = form.save(commit=False)
-            ann.posted_by = request.user
+            ann.created_by = request.user
             ann.save()
             messages.success(request, 'Announcement posted successfully.')
-            # notify students (placeholder)
+            # Notify students
             notify_students_new_announcement(ann)
             return redirect('announcements')
     else:
         form = AnnouncementForm()
     return render(request, 'hostel/create_announcement.html', {'form': form})
 
+@user_passes_test(lambda u: u.is_staff)
+def edit_announcement(request, pk):
+    ann = get_object_or_404(Announcement, pk=pk)
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST, request.FILES, instance=ann)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Announcement updated successfully.')
+            return redirect('announcements')
+    else:
+        form = AnnouncementForm(instance=ann)
+    return render(request, 'hostel/edit_announcement.html', {'form': form, 'announcement': ann})
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_announcement(request, pk):
+    ann = get_object_or_404(Announcement, pk=pk)
+    if request.method == 'POST':
+        ann.delete()
+        messages.success(request, 'Announcement deleted successfully.')
+        return redirect('announcements')
+    return render(request, 'hostel/delete_announcement.html', {'announcement': ann})
+
 
 def notify_students_new_announcement(announcement):
-    # placeholder: send notification via email/SMS
-    pass
+    # Send notification to all students via messages (for simplicity)
+    from django.contrib.auth.models import User
+    students = User.objects.filter(is_staff=False)
+    for student in students:
+        # In a real app, you might use a notification model or email
+        pass  # Placeholder
 
 # ---------- Maintenance Request ----------
 

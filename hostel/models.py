@@ -88,26 +88,47 @@ class OutingPass(models.Model):
 
 class Announcement(models.Model):
     CATEGORY_CHOICES = [
-        ('holidays','Holidays'),
-        ('maintenance','Maintenance'),
-        ('rules','Hostel Rules'),
-        ('events','Events'),
+        ('holiday', 'Holiday'),
+        ('maintenance', 'Maintenance'),
+        ('rules', 'Hostel Rules'),
+        ('event', 'Event'),
+        ('general', 'General'),
+    ]
+    TARGET_CHOICES = [
+        ('all', 'All Students'),
+        ('block', 'Specific Block'),
+        ('room', 'Specific Room'),
     ]
 
     title = models.CharField(max_length=200)
     message = models.TextField()
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='events')
-    posted_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expiry_date = models.DateField(null=True, blank=True, help_text='Announcement will disappear after this date')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
+    target_audience = models.CharField(max_length=20, choices=TARGET_CHOICES, default='all')
+    target_block = models.CharField(max_length=50, blank=True, null=True)
+    target_room = models.CharField(max_length=10, blank=True, null=True)
     attachment = models.FileField(upload_to='announcements/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    is_important = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
 
+    def is_expired(self):
+        if self.expiry_date:
+            return self.expiry_date < timezone.now().date()
+        return False
+
+class AnnouncementReadStatus(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
-        ordering = ['-created_at']
+        unique_together = ['student', 'announcement']
 
 class MessMenu(models.Model):
     MEAL_CHOICES = [
@@ -163,15 +184,15 @@ class VisitorLog(models.Model):
 
 class WeeklyMenu(models.Model):
     DAYS_OF_WEEK = [
-        ('monday', 'Monday'),
-        ('tuesday', 'Tuesday'),
-        ('wednesday', 'Wednesday'),
-        ('thursday', 'Thursday'),
-        ('friday', 'Friday'),
-        ('saturday', 'Saturday'),
-        ('sunday', 'Sunday'),
+        ('01-monday', 'Monday'),
+        ('02-tuesday', 'Tuesday'),
+        ('03-wednesday', 'Wednesday'),
+        ('04-thursday', 'Thursday'),
+        ('05-friday', 'Friday'),
+        ('06-saturday', 'Saturday'),
+        ('07-sunday', 'Sunday'),
     ]
-    day = models.CharField(max_length=10, choices=DAYS_OF_WEEK, unique=True)
+    day = models.CharField(max_length=12, choices=DAYS_OF_WEEK, unique=True)
     breakfast = models.TextField()
     lunch = models.TextField()
     snacks = models.TextField(blank=True, help_text="Optional snacks for the day")
@@ -326,6 +347,21 @@ class ElectricityUsage(models.Model):
     month = models.DateField(help_text='First day of the month')
     units_consumed = models.FloatField()
     recorded_at = models.DateTimeField(auto_now_add=True)
+
+# ---------- AI Chatbot Module ----------
+
+class ChatMessage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()  # User's message
+    response = models.TextField()  # AI response
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_from_user = models.BooleanField(default=True)  # True for user, False for AI
+
+    def __str__(self):
+        return f"{self.user.username}: {self.message[:50]}..."
+
+    class Meta:
+        ordering = ['created_at']
 
     def __str__(self):
         return f"{self.room_number} - {self.month} : {self.units_consumed} units"

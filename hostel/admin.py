@@ -4,6 +4,7 @@ from .models import (
     WeeklyMenu, MealAttendance, FoodFeedback, MessMenu,
     Announcement, MaintenanceRequest, EmergencyAlert,
     LeaveRequest, LostItem, StudentID, ElectricityUsage,
+    ChatMessage,
 )
 
 @admin.register(Room)
@@ -54,8 +55,8 @@ class MessMenuAdmin(admin.ModelAdmin):
 # new model registrations
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'posted_by', 'created_at', 'expiry_date', 'is_active')
-    list_filter = ('category', 'is_active')
+    list_display = ('title', 'category', 'created_by', 'created_at', 'expiry_date', 'is_important')
+    list_filter = ('category', 'is_important')
     search_fields = ('title', 'message')
 
 @admin.register(MaintenanceRequest)
@@ -91,3 +92,10 @@ class ElectricityUsageAdmin(admin.ModelAdmin):
     list_display = ('room_number', 'month', 'units_consumed')
     list_filter = ('month',)
     search_fields = ('room_number',)
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'message', 'created_at', 'is_from_user')
+    list_filter = ('is_from_user', 'created_at')
+    search_fields = ('user__username', 'message')
+    readonly_fields = ('user', 'message', 'response', 'created_at')

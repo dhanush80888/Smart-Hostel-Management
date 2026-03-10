@@ -5,7 +5,7 @@
     <div class="col-md-8">
       <div class="card">
         <div class="card-header">
-          <h2 class="mb-0">Post New Announcement</h2>
+          <h2 class="mb-0">Edit Announcement</h2>
         </div>
         <div class="card-body">
           <form method="post" enctype="multipart/form-data">
@@ -51,12 +51,15 @@
             <div class="mb-3">
               <label for="{{ form.attachment.id_for_label }}" class="form-label">Attachment (Optional)</label>
               {{ form.attachment }}
+              {% if announcement.attachment %}
+                <small class="text-muted">Current: <a href="{{ announcement.attachment.url }}" target="_blank">{{ announcement.attachment.name }}</a></small>
+              {% endif %}
             </div>
             <div class="mb-3 form-check">
               {{ form.is_important }}
               <label for="{{ form.is_important.id_for_label }}" class="form-check-label">Mark as Important</label>
             </div>
-            <button type="submit" class="btn btn-success">Post Announcement</button>
+            <button type="submit" class="btn btn-success">Update Announcement</button>
             <a href="{% url 'announcements' %}" class="btn btn-secondary">Cancel</a>
           </form>
         </div>

@@ -92,14 +92,17 @@ class WeeklyMenuForm(forms.ModelForm):
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ['title', 'message', 'category', 'expiry_date', 'attachment', 'is_active']
+        fields = ['title', 'message', 'category', 'target_audience', 'target_block', 'target_room', 'attachment', 'expiry_date', 'is_important']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'category': forms.Select(attrs={'class': 'form-control'}),
-            'expiry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'target_audience': forms.Select(attrs={'class': 'form-control'}),
+            'target_block': forms.TextInput(attrs={'class': 'form-control'}),
+            'target_room': forms.TextInput(attrs={'class': 'form-control'}),
             'attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'is_important': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 class MaintenanceRequestForm(forms.ModelForm):

@@ -4,29 +4,98 @@
 {% if user.is_staff %}
   <a href="{% url 'create_announcement' %}" class="btn btn-primary mb-3">New Announcement</a>
 {% endif %}
-<form method="get" class="mb-2">
-  <select name="category" class="form-select w-auto d-inline">
-    <option value="">All</option>
-    <option value="holidays">Holidays</option>
-    <option value="maintenance">Maintenance</option>
-    <option value="rules">Hostel Rules</option>
-    <option value="events">Events</option>
-  </select>
-  <button class="btn btn-secondary btn-sm">Filter</button>
+
+<!-- Search and Filters -->
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="search" class="form-control" placeholder="Search announcements..." value="{{ search_query }}">
+  </div>
+  <div class="col-md-3">
+    <select name="category" class="form-select">
+      <option value="">All Categories</option>
+      {% for value, display in categories %}
+        <option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ display }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="important" id="importantCheck" {% if important_only %}checked{% endif %}>
+      <label class="form-check-label" for="importantCheck">
+        Important Only
+      </label>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-secondary w-100">Filter</button>
+  </div>
 </form>
-<ul class="list-group">
+
+<!-- Announcements List -->
+<div class="row">
   {% for ann in announcements %}
-    <li class="list-group-item">
-      <h5>{{ ann.title }} <small class="text-muted">[{{ ann.get_category_display }}]</small></h5>
-      <p>{{ ann.message }}</p>
-      <small>Posted by {{ ann.posted_by }} on {{ ann.created_at|date:'M d, Y' }}
-      {% if ann.expiry_date %} - expires {{ ann.expiry_date }}{% endif %}</small>
-      {% if ann.attachment %}
-        <div><a href="{{ ann.attachment.url }}" target="_blank">Download attachment</a></div>
-      {% endif %}
-    </li>
+    <div class="col-md-12 mb-3">
+      <div class="card {% if ann.is_important %}border-warning{% endif %}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">{{ ann.title }}</h5>
+          {% if ann.is_important %}
+            <span class="badge bg-warning text-dark">Important</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <p class="card-text">{{ ann.message }}</p>
+          <div class="text-muted small">
+            <strong>Category:</strong> {{ ann.get_category_display }} |
+            <strong>Posted by:</strong> {{ ann.created_by.get_full_name|default:ann.created_by.username }} |
+            <strong>Date:</strong> {{ ann.created_at|date:'M d, Y H:i' }}
+            {% if ann.expiry_date %} | <strong>Expires:</strong> {{ ann.expiry_date }}{% endif %}
+          </div>
+          {% if ann.attachment %}
+            <div class="mt-2">
+              <a href="{{ ann.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Download Attachment</a>
+            </div>
+          {% endif %}
+        </div>
+        {% if user.is_staff %}
+          <div class="card-footer">
+            <a href="{% url 'edit_announcement' ann.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'delete_announcement' ann.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   {% empty %}
-    <li class="list-group-item">No announcements.</li>
+    <div class="col-12">
+      <div class="alert alert-info">No announcements found.</div>
+    </div>
   {% endfor %}
-</ul>
+</div>
+
+<!-- Pagination -->
+{% if announcements.has_other_pages %}
+  <nav aria-label="Announcements pagination">
+    <ul class="pagination justify-content-center">
+      {% if announcements.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ announcements.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if important_only %}&important=on{% endif %}">Previous</a>
+        </li>
+      {% endif %}
+      {% for num in announcements.paginator.page_range %}
+        {% if announcements.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > announcements.number|add:'-3' and num < announcements.number|add:'3' %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if important_only %}&important=on{% endif %}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if announcements.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ announcements.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if important_only %}&important=on{% endif %}">Next</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+
 {% endblock %}

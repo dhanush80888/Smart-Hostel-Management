@@ -1,0 +1,164 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+      <p class="text-muted">Visual analytics for room occupancy, fee payments, and complaints.</p>
+    </div>
+    <div>
+      <small class="text-muted">Last updated: {{ now|date:"M d, Y H:i" }}</small>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-home"></i> Room Occupancy (%)</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="occupancyChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="fas fa-rupee-sign"></i> Fee Payment Status</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="feeChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Complaints by Status</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="complaintChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* eslint-disable */
+  document.addEventListener('DOMContentLoaded', function() {
+    // occupancy chart
+    var occCtx = document.getElementById('occupancyChart');
+    if (occCtx) {
+      occCtx = occCtx.getContext('2d');
+      var occLabels = [{% for d in occupancy_data %}'{{ d.room_no }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+      var occValues = [{% for d in occupancy_data %}{{ d.percentage }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+      
+      if (occLabels.length > 0) {
+        new Chart(occCtx, {
+          type: 'bar',
+          data: {
+            labels: occLabels,
+            datasets: [{
+              label: 'Occupancy %',
+              data: occValues,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: { 
+            scales: { 
+              y: { 
+                beginAtZero: true, 
+                max: 100,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              } 
+            },
+            plugins: {
+              legend: {
+                display: true
+              }
+            }
+          }
+        });
+      } else {
+        occCtx.fillStyle = '#666';
+        occCtx.font = '16px Arial';
+        occCtx.textAlign = 'center';
+        occCtx.fillText('No room data available', occCtx.canvas.width / 2, occCtx.canvas.height / 2);
+      }
+    }
+
+    // fee chart
+    var feeCtx = document.getElementById('feeChart');
+    if (feeCtx) {
+      feeCtx = feeCtx.getContext('2d');
+      var paidAmount = {{ fee_chart_data.paid|default:0 }};
+      var dueAmount = {{ fee_chart_data.due|default:0 }};
+      
+      new Chart(feeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Paid (₹' + paidAmount.toLocaleString() + ')', 'Due (₹' + dueAmount.toLocaleString() + ')'],
+          datasets: [{
+            data: [paidAmount, dueAmount],
+            backgroundColor: ['#28a745', '#dc3545'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    // complaint chart
+    var compCtx = document.getElementById('complaintChart');
+    if (compCtx) {
+      compCtx = compCtx.getContext('2d');
+      var compLabels = [{% for c in complaint_stats %}'{{ c.status|title }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+      var compValues = [{% for c in complaint_stats %}{{ c.count }}{% if not forloop.last %},{% endif %}{% endfor %}];
+      
+      if (compLabels.length > 0) {
+        new Chart(compCtx, {
+          type: 'pie',
+          data: {
+            labels: compLabels,
+            datasets: [{
+              data: compValues,
+              backgroundColor: ['#007bff', '#ffc107', '#dc3545', '#28a745', '#6f42c1', '#e83e8c'],
+              borderWidth: 2
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      } else {
+        compCtx.fillStyle = '#666';
+        compCtx.font = '16px Arial';
+        compCtx.textAlign = 'center';
+        compCtx.fillText('No complaint data available', compCtx.canvas.width / 2, compCtx.canvas.height / 2);
+      }
+    }
+  });
+</script>
+{% endblock %}

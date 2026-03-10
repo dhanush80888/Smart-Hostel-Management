@@ -17,27 +17,15 @@
         </button>
         <div class="collapse navbar-collapse" id="nav">
           <ul class="navbar-nav me-auto">
-            {% if not user.is_staff %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'rooms' %}">Rooms</a></li>
-            {% endif %}
             {% if user.is_authenticated %}
               {% if not user.is_staff %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'complaints' %}">Complaints</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'menu' %}">Weekly Menu</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'attendance' %}">Attendance</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'feedback' %}">Feedback</a></li>
-              {% endif %}
-              {% if not user.is_staff %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'submit_complaint' %}">New Complaint</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'make_payment' %}">Pay Fee</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'request_outing_pass' %}">Outing Pass</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'my_outing_passes' %}">My Outing Passes</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'visitor_register' %}">Register Visitor</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'visitor_status' %}">My Visitors</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'announcements' %}">Announcements</a></li>
               {% endif %}
               {% if user.is_staff %}
                 {# visitor requests and security dashboard removed from navbar per UX request #}
+                <li class="nav-item"><a class="nav-link" href="{% url 'analytics' %}">Analytics</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'attendance_report' %}">Attendance Report</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'feedback_report' %}">Feedback Report</a></li>
                 <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>

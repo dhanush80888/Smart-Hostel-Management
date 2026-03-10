@@ -7,6 +7,7 @@ urlpatterns = [
     path('logout/', views.custom_logout, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('analytics/', views.analytics, name='analytics'),
     path('student-dashboard/', views.student_dashboard, name='student_dashboard'),
     path('rooms/', views.rooms_list, name='rooms'),
     path('rooms/<int:pk>/', views.room_detail, name='room_detail'),
@@ -45,6 +46,8 @@ urlpatterns = [
     # announcement system
     path('announcements/', views.announcements_list, name='announcements'),
     path('announcements/create/', views.create_announcement, name='create_announcement'),
+    path('announcements/edit/<int:pk>/', views.edit_announcement, name='edit_announcement'),
+    path('announcements/delete/<int:pk>/', views.delete_announcement, name='delete_announcement'),
 
     # maintenance requests
     path('maintenance/submit/', views.submit_maintenance, name='submit_maintenance'),
