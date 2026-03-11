@@ -1,0 +1,213 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="welcome-header mb-4">
+    <h2>Welcome, {{ user.get_full_name|default:user.username }}!</h2>
+    <p class="text-muted">Here's an overview of your hostel activities.</p>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card room-status">
+        <div class="card-body">
+          <h5><i class="fas fa-bed"></i> Room Status</h5>
+          <h3>{% if profile.room %}{{ profile.room.room_no }}{% else %}Not Assigned{% endif %}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card total-due">
+        <div class="card-body">
+          <h5><i class="fas fa-money-bill-wave"></i> Total Due</h5>
+          <h3>₹{{ profile.outstanding }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card total-paid">
+        <div class="card-body">
+          <h5><i class="fas fa-wallet"></i> Total Paid</h5>
+          <h3>₹{{ profile.fees_paid|default:0 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card complaints-submitted">
+        <div class="card-body">
+          <h5><i class="fas fa-exclamation-triangle"></i> Complaints Submitted</h5>
+          <h3>{{ total_complaints }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile and Fee Details -->
+  <div class="row mb-4">
+    <div class="col-md-6 mb-3">
+      <div class="card profile-card">
+        <div class="card-header">
+          <h5><i class="fas fa-user"></i> Your Profile</h5>
+        </div>
+        <div class="card-body">
+          <div class="profile-item">
+            <i class="fas fa-user-circle"></i>
+            <span><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</span>
+          </div>
+          <div class="profile-item">
+            <i class="fas fa-id-card"></i>
+            <span><strong>Roll Number:</strong> {{ profile.roll_number|default:"N/A" }}</span>
+          </div>
+          <div class="profile-item">
+            <i class="fas fa-envelope"></i>
+            <span><strong>Email:</strong> {{ user.email }}</span>
+          </div>
+          <div class="profile-item">
+            <i class="fas fa-home"></i>
+            <span><strong>Room Number:</strong> {% if profile.room %}{{ profile.room.room_no }}{% else %}Not Assigned{% endif %}</span>
+          </div>
+          <div class="profile-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span><strong>Joined Date:</strong> {{ profile.joined_on|date:"M d, Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card fee-card">
+        <div class="card-header">
+          <h5><i class="fas fa-rupee-sign"></i> Fee Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="fee-item">
+            <span>Total Due:</span>
+            <span class="fee-amount text-danger">₹{{ profile.outstanding }}</span>
+          </div>
+          <div class="fee-item">
+            <span>Total Paid:</span>
+            <span class="fee-amount text-success">₹{{ profile.fees_paid|default:0 }}</span>
+          </div>
+          <div class="fee-item total">
+            <span>Outstanding:</span>
+            <span class="fee-amount text-warning">₹{{ profile.outstanding }}</span>
+          </div>
+          <a href="{% url 'make_payment' %}" class="btn btn-success btn-lg w-100 mt-3">
+            <i class="fas fa-credit-card"></i> Pay Fees
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Payments and Complaints -->
+  <div class="row mb-4">
+    <div class="col-md-6 mb-3">
+      <div class="card payments-card">
+        <div class="card-header">
+          <h5><i class="fas fa-history"></i> Recent Payments</h5>
+        </div>
+        <div class="card-body">
+          {% for payment in payments %}
+            <div class="payment-item">
+              <div class="d-flex justify-content-between">
+                <span>{{ payment.paid_on|date:"M d, Y" }}</span>
+                <span class="text-success">₹{{ payment.amount }}</span>
+              </div>
+              <small class="text-muted">{{ payment.method }}</small>
+            </div>
+          {% empty %}
+            <div class="text-center py-4">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No payments recorded yet.</p>
+            </div>
+          {% endfor %}
+          <a href="{% url 'make_payment' %}" class="btn btn-primary btn-sm mt-3">
+            <i class="fas fa-plus"></i> Add Payment
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card complaints-card">
+        <div class="card-header">
+          <h5><i class="fas fa-comments"></i> Recent Complaints</h5>
+        </div>
+        <div class="card-body">
+          {% for complaint in complaints %}
+            <div class="complaint-item">
+              <h6>{{ complaint.title }}</h6>
+              <p class="text-muted">{{ complaint.description|truncatechars:50 }}</p>
+              <div class="d-flex justify-content-between">
+                <span class="badge bg-info">{{ complaint.get_status_display }}</span>
+                <small class="text-muted">{{ complaint.created_at|date:"M d, Y" }}</small>
+              </div>
+            </div>
+          {% empty %}
+            <div class="text-center py-4">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No complaints submitted yet.</p>
+            </div>
+          {% endfor %}
+          <a href="{% url 'submit_complaint' %}" class="btn btn-warning btn-sm mt-3">
+            <i class="fas fa-plus"></i> Submit Complaint
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card quick-actions-card">
+        <div class="card-header">
+          <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'request_outing_pass' %}" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-plane"></i> Request Outing Pass
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'my_outing_passes' %}" class="btn btn-info btn-lg w-100">
+                <i class="fas fa-list"></i> My Outing Passes
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'rooms' %}" class="btn btn-success btn-lg w-100">
+                <i class="fas fa-th-large"></i> Browse Rooms
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'complaints' %}" class="btn btn-warning btn-lg w-100">
+                <i class="fas fa-comments"></i> View All Complaints
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'submit_complaint' %}" class="btn btn-danger btn-lg w-100">
+                <i class="fas fa-exclamation-triangle"></i> Submit Complaint
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'visitor_register' %}" class="btn btn-secondary btn-lg w-100">
+                <i class="fas fa-user-plus"></i> Register Visitor
+              </a>
+            </div>
+            <div class="col-md-2 mb-3">
+              <a href="{% url 'visitor_status' %}" class="btn btn-info btn-lg w-100">
+                <i class="fas fa-users"></i> My Visitors
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

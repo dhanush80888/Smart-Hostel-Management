@@ -1,0 +1,178 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Admin Dashboard</h2>
+  <div class="alert alert-info">
+    <strong>Welcome Admin!</strong> You are logged in as: <strong>{{ user.username }}</strong>
+  </div>
+  <div class="row">
+    <!-- Quick Actions Sidebar -->
+    <div class="col-md-3">
+      <div class="quick-actions-sidebar">
+        <div class="card quick-actions-card">
+          <div class="card-header">
+            <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <a href="{% url 'admin_outing_requests' %}" class="btn btn-success btn-lg mb-3">
+              <i class="fas fa-clipboard-list"></i> View Outing Requests
+            </a>
+            <a href="{% url 'admin_visitor_requests' %}" class="btn btn-info btn-lg mb-3">
+              <i class="fas fa-users"></i> Visitor Requests
+            </a>
+            <a href="{% url 'allocate_room' %}" class="btn btn-primary btn-lg mb-3">
+              <i class="fas fa-key"></i> Allocate Rooms
+            </a>
+            <a href="{% url 'rooms' %}" class="btn btn-info mb-3">
+              <i class="fas fa-th-large"></i> View Rooms
+            </a>
+            <a href="{% url 'mutual_transfer' %}" class="btn btn-warning mb-3">
+              <i class="fas fa-random"></i> Mutual Transfer
+            </a>
+            <a href="{% url 'complaints' %}" class="btn btn-warning mb-3">
+              <i class="fas fa-bullhorn"></i> View All Complaints
+            </a>
+            <a href="{% url 'security_dashboard' %}" class="btn btn-dark mb-3">
+              <i class="fas fa-shield-alt"></i> Security Dashboard
+            </a>
+            <a href="/admin/" class="btn btn-secondary">
+              <i class="fas fa-cogs"></i> Django Admin
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Main Content -->
+    <div class="col-md-9">
+      <!-- Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="card stats-card">
+            <div class="card-body">
+              <h5><i class="fas fa-home"></i> Total Rooms</h5>
+              <h3>{{ total_rooms }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stats-card occupied">
+            <div class="card-body">
+              <h5><i class="fas fa-user-check"></i> Occupied Rooms</h5>
+              <h3>{{ occupied }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stats-card students">
+            <div class="card-body">
+              <h5><i class="fas fa-users"></i> Total Students</h5>
+              <h3>{{ total_students }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stats-card complaints">
+            <div class="card-body">
+              <h5><i class="fas fa-exclamation-triangle"></i> Open Complaints</h5>
+              <h3>{{ complaints_open }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Visitor Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+          <div class="card stats-card visitors-today">
+            <div class="card-body">
+              <h5><i class="fas fa-users"></i> Visitors Today</h5>
+              <h3>{{ total_visitors_today }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card stats-card pending-visitors">
+            <div class="card-body">
+              <h5><i class="fas fa-clock"></i> Pending Approvals</h5>
+              <h3>{{ pending_visitors }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card stats-card approved-visitors">
+            <div class="card-body">
+              <h5><i class="fas fa-check-circle"></i> Approved Today</h5>
+              <h3>{{ approved_visitors_today }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue and Capacity Cards -->
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <div class="card stats-card revenue">
+            <div class="card-body">
+              <h5><i class="fas fa-rupee-sign"></i> Total Revenue Collected</h5>
+              <h3>₹{{ total_revenue }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card stats-card capacity">
+            <div class="card-body">
+              <h5><i class="fas fa-chart-line"></i> Available Capacity</h5>
+              <h3>{{ total_rooms|add:"-1" }} rooms</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card complaints-card">
+            <div class="card-header">
+              <h5><i class="fas fa-comments"></i> Recent Complaints</h5>
+            </div>
+            <div class="card-body">
+              {% for complaint in recent_complaints %}
+                <div class="complaint-item">
+                  <h6 class="mb-2">{{ complaint.title }}</h6>
+                  <p class="text-muted mb-2">{{ complaint.description }}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                      <strong><i class="fas fa-user"></i> By:</strong> {{ complaint.student.user.get_full_name|default:complaint.student.user.username }}
+                      {% if complaint.anonymous %}
+                        <span class="badge bg-secondary ms-2">Anonymous</span>
+                      {% endif %}
+                    </small>
+                    <div>
+                      <span class="badge bg-info me-2">{{ complaint.get_status_display }}</span>
+                      <small class="text-muted">{{ complaint.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                  </div>
+                  {% if complaint.response %}
+                    <div class="alert alert-success mt-3 mb-0">
+                      <strong><i class="fas fa-reply"></i> Admin Response:</strong> {{ complaint.response }}
+                    </div>
+                  {% endif %}
+                </div>
+              {% empty %}
+                <div class="text-center py-4">
+                  <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                  <p class="text-muted">No complaints yet.</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Allocate Room to Student</h2>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_username" class="form-label">Student Username</label>
+      {{ form.username }}
+    </div>
+    <button type="submit" class="btn btn-primary">Allocate Random Room</button>
+  </form>
+
+  <h3 class="mt-5">Current Room Allocations</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Username</th>
+        <th>Room</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+        <tr>
+          <td>{{ student.user.get_full_name }}</td>
+          <td>{{ student.user.username }}</td>
+          <td>{% if student.room %}Room {{ student.room.room_no }}{% else %}<span class="text-muted">Not Allocated</span>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">No students yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

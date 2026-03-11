@@ -1,0 +1,260 @@
+{% extends 'hostel/base.html' %}
+{% load static %}
+
+{% block title %}Outing Pass Requests - Smart Hostel Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">🚪 Outing Pass Requests Management</h2>
+
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center shadow-lg border-0 bg-warning text-dark">
+                        <div class="card-body">
+                            <h3>⏳</h3>
+                            <h5>{{ pending.count }}</h5>
+                            <p class="mb-0">Pending Requests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center shadow-lg border-0 bg-success text-white">
+                        <div class="card-body">
+                            <h3>✅</h3>
+                            <h5>{{ approved.count }}</h5>
+                            <p class="mb-0">Approved Passes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center shadow-lg border-0 bg-danger text-white">
+                        <div class="card-body">
+                            <h3>❌</h3>
+                            <h5>{{ rejected.count }}</h5>
+                            <p class="mb-0">Rejected Passes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Requests -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">⏳ Pending Requests ({{ pending.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Roll No</th>
+                                        <th>Dates</th>
+                                        <th>Days</th>
+                                        <th>Reason</th>
+                                        <th>Guardian Email</th>
+                                        <th>Requested On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pass in pending %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ pass.student.user.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">@{{ pass.student.user.username }}</small>
+                                            </td>
+                                            <td>{{ pass.student.roll_number }}</td>
+                                            <td>
+                                                <small>
+                                                    📅 {{ pass.from_date|date:"d M" }} - {{ pass.to_date|date:"d M Y" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ pass.days_requested }} day(s)</span>
+                                            </td>
+                                            <td>
+                                                <small>{{ pass.reason|truncatewords:5 }}</small>
+                                            </td>
+                                            <td>
+                                                <small>{{ pass.guardian_email }}</small>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">{{ pass.requested_on|date:"d M Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'approve_outing_pass' pass.id %}" class="btn btn-sm btn-success" title="Approve">
+                                                    <i class="fas fa-check"></i> Approve
+                                                </a>
+                                                <a href="{% url 'reject_outing_pass' pass.id %}" class="btn btn-sm btn-danger" title="Reject">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center py-4">
+                            <i class="fas fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="mt-2 text-muted">No pending requests</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Approved Passes -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">✅ Approved Passes ({{ approved.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if approved %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Dates</th>
+                                        <th>Days</th>
+                                        <th>Approved By</th>
+                                        <th>Approved On</th>
+                                        <th>Guardian Notified</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pass in approved %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ pass.student.user.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">@{{ pass.student.user.username }}</small>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    📅 {{ pass.from_date|date:"d M" }} - {{ pass.to_date|date:"d M Y" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ pass.days_requested }} day(s)</span>
+                                            </td>
+                                            <td>{{ pass.approved_by.get_full_name }}</td>
+                                            <td>
+                                                <small class="text-muted">{{ pass.approved_on|date:"d M Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                {% if pass.notification_sent %}
+                                                    <span class="badge bg-success">📧 Sent</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">❌ Not Sent</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center py-4">
+                            <i class="fas fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="mt-2 text-muted">No approved passes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Rejected Passes -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">❌ Rejected Passes ({{ rejected.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if rejected %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Dates</th>
+                                        <th>Days</th>
+                                        <th>Rejection Reason</th>
+                                        <th>Guardian Notified</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pass in rejected %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ pass.student.user.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">@{{ pass.student.user.username }}</small>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    📅 {{ pass.from_date|date:"d M" }} - {{ pass.to_date|date:"d M Y" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ pass.days_requested }} day(s)</span>
+                                            </td>
+                                            <td>
+                                                <small>{{ pass.rejection_reason|truncatewords:10 }}</small>
+                                            </td>
+                                            <td>
+                                                {% if pass.notification_sent %}
+                                                    <span class="badge bg-success">📧 Sent</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">❌ Not Sent</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center py-4">
+                            <i class="fas fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="mt-2 text-muted">No rejected passes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Back to Dashboard -->
+            <div class="mt-4">
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.75rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
