@@ -363,12 +363,6 @@ class ChatMessage(models.Model):
     class Meta:
         ordering = ['created_at']
 
-    def __str__(self):
-        return f"{self.room_number} - {self.month} : {self.units_consumed} units"
-
-
-    class Meta:
-        ordering = ['-month']
 
 class PollOption(models.Model):
     poll = models.ForeignKey(FoodPoll, on_delete=models.CASCADE)

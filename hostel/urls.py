@@ -70,4 +70,8 @@ urlpatterns = [
 
     # electricity usage (admin)
     path('electricity/usage/', views.electricity_usage, name='electricity_usage'),
+
+    # chatbot interface and API
+    path('chatbot/', views.chatbot_page, name='chatbot_page'),
+    path('chatbot/api/', views.hostel_chatbot, name='hostel_chatbot'),
 ]

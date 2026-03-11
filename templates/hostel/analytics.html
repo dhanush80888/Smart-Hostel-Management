@@ -112,7 +112,7 @@
           labels: ['Paid (₹' + paidAmount.toLocaleString() + ')', 'Due (₹' + dueAmount.toLocaleString() + ')'],
           datasets: [{
             data: [paidAmount, dueAmount],
-            backgroundColor: ['#28a745', '#dc3545'],
+            backgroundColor: ['#34A853', '#E53935'],
             borderWidth: 2
           }]
         },
@@ -140,7 +140,8 @@
             labels: compLabels,
             datasets: [{
               data: compValues,
-              backgroundColor: ['#007bff', '#ffc107', '#dc3545', '#28a745', '#6f42c1', '#e83e8c'],
+              backgroundColor: ['#1A73E8', '#34A853', '#FF7043', '#E53935', '#0D47A1', '#202124']
+              // primary, success, accent, danger, info, dark,
               borderWidth: 2
             }]
           },

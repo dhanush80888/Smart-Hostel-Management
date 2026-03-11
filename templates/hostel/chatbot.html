@@ -1,0 +1,86 @@
+{% extends 'hostel/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Hostel Chatbot</h2>
+
+  {% if not openai_available or not key_configured %}
+    <div class="alert alert-info">
+      <strong>ℹ️ Limited Mode:</strong> The chatbot is running with basic responses. 
+      {% if not openai_available %}
+        For full AI capabilities, install the openai package with <code>pip install openai</code>.
+      {% else %}
+        For full AI capabilities, configure the <code>OPENAI_API_KEY</code> environment variable.
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div id="chat-window" class="border rounded p-3 mb-3" style="height:400px; overflow-y:auto; background:#f8f9fa;">
+    {% for msg in history %}
+      {% if msg.message %}
+        <div><strong>You:</strong> {{ msg.message }}</div>
+      {% endif %}
+      {% if msg.response %}
+        <div><strong>Bot:</strong> {{ msg.response }}</div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <form id="chat-form" method="post" class="mb-5">
+    {% csrf_token %}
+    <div class="input-group">
+      <input type="text" id="chat-input" name="message" class="form-control" placeholder="Type a message..." autocomplete="off">
+      <button type="submit" class="btn btn-primary">Send</button>
+    </div>
+  </form>
+</div>
+
+<script>
+function addMessage(who,text){
+  var win = document.getElementById('chat-window');
+  var div = document.createElement('div');
+  div.innerHTML = '<strong>'+who+':</strong> '+text;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+}
+
+// grab CSRF token from the cookie (Django default)
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+document.getElementById('chat-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  var msg = document.getElementById('chat-input').value.trim();
+  if(!msg) return;
+  addMessage('You', msg);
+  document.getElementById('chat-input').value='';
+  fetch('{% url "hostel_chatbot" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': csrftoken,
+    },
+    body: 'message=' + encodeURIComponent(msg)
+  })
+    .then(r=>r.json())
+    .then(data=>{
+      addMessage('Bot', data.reply);
+    })
+    .catch(err=>{
+      console.error(err);
+      addMessage('Bot', 'Error contacting server');
+    });
+});
+</script>
+{% endblock %}

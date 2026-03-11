@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -23,6 +24,16 @@ from .models import (
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
+
+# openai integration for chatbot
+from django.conf import settings
+try:
+    import openai
+except ImportError:
+    openai = None
+
+if openai and getattr(settings, 'OPENAI_API_KEY', ''):
+    openai.api_key = settings.OPENAI_API_KEY
 
 def home(request):
     if request.user.is_authenticated:
@@ -105,8 +116,104 @@ def admin_dashboard(request):
         'total_feedback': total_feedback,
         'total_attendance': total_attendance,
         'on_leave': on_leave,
+        # hide chatbot link when rendering the dashboard
+        'hide_chatbot': True,
     }
     return render(request, 'hostel/admin_dashboard.html', context)
+
+
+# ---------- Chatbot views -------------------------------------------------
+@login_required
+def chatbot_page(request):
+    """Render a simple chat UI and show past conversation.
+
+    The chatbot works with basic responses. For full AI capabilities,
+    configure the OpenAI API key. The page displays informational alerts
+    about the configuration status.
+    """
+    history = ChatMessage.objects.filter(user=request.user).order_by('created_at')
+    openai_available = bool(openai)
+    key_configured = bool(getattr(settings, 'OPENAI_API_KEY', '').strip())
+
+    return render(request, 'hostel/chatbot.html', {
+        'history': history,
+        'openai_available': openai_available,
+        'key_configured': key_configured,
+    })
+
+
+@login_required
+def hostel_chatbot(request):
+    """AJAX endpoint to forward messages to OpenAI and return the reply.
+
+    The endpoint accepts either GET (legacy) or POST with a `message` parameter.
+    It always returns a JSON object with a `reply` key so the frontend can display
+    something even if the backend is misconfigured.
+    """
+    # prefer POST but fall back to GET for backwards compatibility
+    if request.method == 'POST':
+        user_message = request.POST.get('message', '').strip()
+    else:
+        user_message = request.GET.get('message', '').strip()
+
+    if not user_message:
+        return JsonResponse({'reply': ''})
+
+    # record user message for history
+    ChatMessage.objects.create(user=request.user, message=user_message, response='', is_from_user=True)
+
+    answer = ''
+    # Try to use OpenAI API if configured
+    if openai and getattr(settings, 'OPENAI_API_KEY', ''):
+        try:
+            resp = openai.ChatCompletion.create(
+                model='gpt-3.5-turbo',
+                messages=[
+                    {
+                        'role': 'system',
+                        'content': (
+                            'You are a helpful AI assistant for a university hostel management '
+                            'system. You assist students with hostel-related queries such as '
+                            'outpass, room allocation, mess menu, complaint status, fee payment, '
+                            'visitor rules, and general hostel information. Always provide '
+                            'concise, clear, and polite responses.'
+                        ),
+                    },
+                    {'role': 'user', 'content': user_message},
+                ],
+                max_tokens=500,
+            )
+            answer = resp.choices[0].message.content
+        except Exception as exc:
+            # help developer troubleshoot by printing the exception
+            print('[chatbot] OpenAI request error:', exc)
+            answer = "Sorry, I'm unable to process your request at the moment."
+    else:
+        # Provide fallback responses when OpenAI is not configured
+        msg_lower = user_message.lower()
+        
+        # Simple keyword-based responses
+        if any(word in msg_lower for word in ['hello', 'hi', 'hey', 'greetings']):
+            answer = "Hello! Welcome to the Hostel Management System. I'm here to help you with hostel-related queries. You can ask me about outpass, room allocation, mess menu, complaints, fees, and more."
+        elif any(word in msg_lower for word in ['outpass', 'outing']):
+            answer = "To request an outing pass, go to your Student Dashboard and click on 'Outing Pass'. Fill in the dates you'll be away and provide a reason. The request will be sent to the warden for approval."
+        elif any(word in msg_lower for word in ['room', 'allocation', 'allot']):
+            answer = "Room allocation is typically handled by the hostel administration. Please contact the hostel office or check your student dashboard for your assigned room details."
+        elif any(word in msg_lower for word in ['mess', 'menu', 'food', 'meal']):
+            answer = "You can check the weekly meal menu in the Mess section of your dashboard. The menu is updated every week with details of breakfast, lunch, snacks, and dinner."
+        elif any(word in msg_lower for word in ['complaint', 'issue', 'problem']):
+            answer = "To file a complaint, visit the Complaints section in your dashboard. Select the category, describe your issue, and submit. You can track the status of your complaints and view responses from the administration."
+        elif any(word in msg_lower for word in ['fee', 'payment', 'rent', 'charge']):
+            answer = "You can view and pay your fees through the Payments section in your dashboard. Outstanding fees are displayed, and you can make online or offline payments. Your payment history is available for your records."
+        elif any(word in msg_lower for word in ['visitor', 'guest', 'visit']):
+            answer = "To invite visitors, submit a visitor request with their details and expected visit date. The hostel administration will review and approve your request. You'll receive a notification once it's processed."
+        elif any(word in msg_lower for word in ['help', 'support', 'contact']):
+            answer = "For immediate support, please contact the hostel office during working hours. You can also submit a complaint or message through this chatbot for hostel-related queries."
+        else:
+            answer = "Thank you for your message! While I'm currently operating with limited functionality, I can provide general information about hostel services. For specific queries, please contact the hostel administration or visit your dashboard. What specific hostel service can I help you with?"
+
+    ChatMessage.objects.create(user=request.user, message='', response=answer, is_from_user=False)
+    return JsonResponse({'reply': answer})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -122,6 +229,32 @@ def manage_weekly_menu(request):
     # ensure one record for each day exists
     for d, _ in WeeklyMenu.DAYS_OF_WEEK:
         WeeklyMenu.objects.get_or_create(day=d)
+
+    # if any field is empty, populate with a sensible placeholder to guide admins
+    defaults = {
+        'Monday':    {'breakfast':'Paratha + Tea','lunch':'Rice, Dal & Veg','snacks':'--','dinner':'Chapati & Curry'},
+        'Tuesday':   {'breakfast':'Idli & Chutney','lunch':'Rajma Chawal','snacks':'Tea & Biscuit','dinner':'Veg Pulao'},
+        'Wednesday': {'breakfast':'Poha & Juice','lunch':'Chicken Curry','snacks':'Pakora','dinner':'Paneer Butter Masala'},
+        'Thursday':  {'breakfast':'Pancakes','lunch':'Masoor Dal','snacks':'Fruit Salad','dinner':'Veg Biryani'},
+        'Friday':    {'breakfast':'Bread & Omelette','lunch':'Chole Bhature','snacks':'Cutlet','dinner':'Mixed Vegetable'},
+        'Saturday':  {'breakfast':'Upma & Coffee','lunch':'Fish Curry','snacks':'Chaats','dinner':'Noodles'},
+        'Sunday':    {'breakfast':'Aloo Paratha','lunch':'Mutton Curry','snacks':'Kachori','dinner':'Dal Tadka'},
+    }
+    for m in WeeklyMenu.objects.all():
+        dayname = m.get_day_display()
+        if dayname in defaults:
+            vals = defaults[dayname]
+            updated = False
+            if not m.breakfast:
+                m.breakfast = vals['breakfast']; updated = True
+            if not m.lunch:
+                m.lunch = vals['lunch']; updated = True
+            if not m.snacks:
+                m.snacks = vals['snacks']; updated = True
+            if not m.dinner:
+                m.dinner = vals['dinner']; updated = True
+            if updated:
+                m.save()
 
     if request.method == 'POST':
         formset = MenuFormSet(request.POST, queryset=WeeklyMenu.objects.order_by('day'))
@@ -236,12 +369,27 @@ def student_dashboard(request):
     from datetime import date
     today = date.today()
     todays_menu = MessMenu.objects.filter(date=today, is_active=True)
+
     # fetch weekly menu; convert to list to force evaluation so we can catch DB errors
     try:
         weekly_menu = list(WeeklyMenu.objects.filter(is_active=True).order_by('day'))
     except OperationalError:
         # migrations not applied yet
         weekly_menu = []
+
+    # provide default schedule if admin hasn't filled it
+    if not weekly_menu or any(not (m.breakfast or m.lunch or m.dinner) for m in weekly_menu):
+        default = [
+            {'day': 'Monday',    'breakfast': 'Paratha + Tea', 'lunch': 'Rice, Dal & Vegetable', 'snacks': 'Samosa',                         'dinner': 'Chapati, Curry & Salad'},
+            {'day': 'Tuesday',   'breakfast': 'Idli & Chutney', 'lunch': 'Rajma Chawal',           'snacks': 'Tea & Biscuit',               'dinner': 'Vegetable Pulao & Raita'},
+            {'day': 'Wednesday', 'breakfast': 'Poha & Juice',     'lunch': 'Chicken Curry & Rice',  'snacks': 'Pakora',                      'dinner': 'Chapati, Paneer Butter Masala'},
+            {'day': 'Thursday',  'breakfast': 'Pancakes & Fruit', 'lunch': 'Masoor Dal & Rice',     'snacks': 'Fruit Salad',                 'dinner': 'Veg Biryani & Curd'},
+            {'day': 'Friday',    'breakfast': 'Bread & Omelette', 'lunch': 'Chole Bhature',         'snacks': 'Cutlet',                     'dinner': 'Chapati & Mixed Vegetable'},
+            {'day': 'Saturday',  'breakfast': 'Upma & Coffee',     'lunch': 'Fish Curry & Rice',     'snacks': 'Chaats',                     'dinner': 'Noodles & Manchurian'},
+            {'day': 'Sunday',    'breakfast': 'Aloo Paratha',      'lunch': 'Mutton Curry & Rice',   'snacks': 'Kachori',                    'dinner': 'Chapati & Dal Tadka'},
+        ]
+        from types import SimpleNamespace
+        weekly_menu = [SimpleNamespace(**d) for d in default]
 
     context = {
         'profile': profile,
@@ -253,6 +401,8 @@ def student_dashboard(request):
         'weekly_menu': weekly_menu,
         'total_complaints': total_complaints,
         'total_payments': total_payments,
+        # show chatbot link on the dashboard specifically
+        'hide_chatbot': False,
     }
     return render(request, 'hostel/student_dashboard.html', context)
 
@@ -260,11 +410,31 @@ def student_dashboard(request):
 # ------ Mess views for students ------------------------------------------------
 @login_required
 def view_weekly_menu(request):
-    """Show active weekly menu for students"""
+    """Show active weekly menu for students
+
+    If the admin has not filled the menu yet we provide a generic
+    placeholder schedule so the student interface is never blank.
+    """
     try:
-        menu = WeeklyMenu.objects.filter(is_active=True).order_by('day')
+        menu = list(WeeklyMenu.objects.filter(is_active=True).order_by('day'))
     except OperationalError:
         menu = []
+
+    # simple default schedule to show when database entries are empty/blank
+    if not menu or any(not (m.breakfast or m.lunch or m.dinner) for m in menu):
+        default = [
+            {'day': 'Monday',    'breakfast': 'Paratha + Tea', 'lunch': 'Rice, Dal & Vegetable', 'snacks': 'Samosa',                         'dinner': 'Chapati, Curry & Salad'},
+            {'day': 'Tuesday',   'breakfast': 'Idli & Chutney', 'lunch': 'Rajma Chawal',           'snacks': 'Tea & Biscuit',               'dinner': 'Vegetable Pulao & Raita'},
+            {'day': 'Wednesday', 'breakfast': 'Poha & Juice',     'lunch': 'Chicken Curry & Rice',  'snacks': 'Pakora',                      'dinner': 'Chapati, Paneer Butter Masala'},
+            {'day': 'Thursday',  'breakfast': 'Pancakes & Fruit', 'lunch': 'Masoor Dal & Rice',     'snacks': 'Fruit Salad',                 'dinner': 'Veg Biryani & Curd'},
+            {'day': 'Friday',    'breakfast': 'Bread & Omelette', 'lunch': 'Chole Bhature',         'snacks': 'Cutlet',                     'dinner': 'Chapati & Mixed Vegetable'},
+            {'day': 'Saturday',  'breakfast': 'Upma & Coffee',     'lunch': 'Fish Curry & Rice',     'snacks': 'Chaats',                     'dinner': 'Noodles & Manchurian'},
+            {'day': 'Sunday',    'breakfast': 'Aloo Paratha',      'lunch': 'Mutton Curry & Rice',   'snacks': 'Kachori',                    'dinner': 'Chapati & Dal Tadka'},
+        ]
+        # convert to simple objects that template can iterate over
+        from types import SimpleNamespace
+        menu = [SimpleNamespace(**d) for d in default]
+
     return render(request, 'hostel/menu.html', {'weekly_menu': menu})
 
 

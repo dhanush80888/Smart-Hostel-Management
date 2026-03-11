@@ -7,7 +7,10 @@
     <p class="text-muted">Here's an overview of your hostel activities.</p>
   </div>
 
-  <!-- Statistics Cards -->
+  <div class="row">
+    <div class="col-md-9">
+
+      <!-- Statistics Cards -->
   <div class="row mb-4">
     <div class="col-md-3 mb-3">
       <div class="card stats-card room-status">
@@ -191,56 +194,43 @@
     </div>
   </div>
 
-  <!-- Quick Actions -->
-  <div class="row">
-    <div class="col-md-12">
+  </div> <!-- end col-md-9 -->
+
+    <div class="col-md-3 mb-4">
+      <!-- Quick Actions -->
       <div class="card quick-actions-card">
         <div class="card-header">
           <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'request_outing_pass' %}" class="btn btn-primary btn-lg w-100">
-                <i class="fas fa-plane"></i> Request Outing Pass
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'my_outing_passes' %}" class="btn btn-info btn-lg w-100">
-                <i class="fas fa-list"></i> My Outing Passes
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'rooms' %}" class="btn btn-success btn-lg w-100">
-                <i class="fas fa-th-large"></i> Browse Rooms
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'complaints' %}" class="btn btn-warning btn-lg w-100">
-                <i class="fas fa-comments"></i> View All Complaints
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'submit_complaint' %}" class="btn btn-danger btn-lg w-100">
-                <i class="fas fa-exclamation-triangle"></i> Submit Complaint
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'visitor_register' %}" class="btn btn-secondary btn-lg w-100">
-                <i class="fas fa-user-plus"></i> Register Visitor
-              </a>
-            </div>
-            <div class="col-md-2 mb-3">
-              <a href="{% url 'visitor_status' %}" class="btn btn-info btn-lg w-100">
-                <i class="fas fa-users"></i> My Visitors
-              </a>
-            </div>
+          <div class="d-grid gap-2">
+            <a href="{% url 'request_outing_pass' %}" class="btn btn-primary btn-lg w-100">
+              <i class="fas fa-plane"></i> Request Outing Pass
+            </a>
+            <a href="{% url 'my_outing_passes' %}" class="btn btn-info btn-lg w-100">
+              <i class="fas fa-list"></i> My Outing Passes
+            </a>
+            <a href="{% url 'rooms' %}" class="btn btn-success btn-lg w-100">
+              <i class="fas fa-th-large"></i> Browse Rooms
+            </a>
+            <a href="{% url 'complaints' %}" class="btn btn-warning btn-lg w-100">
+              <i class="fas fa-comments"></i> View All Complaints
+            </a>
+            <a href="{% url 'submit_complaint' %}" class="btn btn-danger btn-lg w-100">
+              <i class="fas fa-exclamation-triangle"></i> Submit Complaint
+            </a>
+            <a href="{% url 'visitor_register' %}" class="btn btn-secondary btn-lg w-100">
+              <i class="fas fa-user-plus"></i> Register Visitor
+            </a>
+            <a href="{% url 'visitor_status' %}" class="btn btn-info btn-lg w-100">
+              <i class="fas fa-users"></i> My Visitors
+            </a>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </div> <!-- end col-md-3 -->
+  </div> <!-- end main row -->
 
   <!-- Weekly menu preview -->
   {% if weekly_menu %}
@@ -274,6 +264,6 @@
     </div>
   {% endif %}
 
-<!-- Font Awesome for icons -->
+<!-- Font Awesome for icons (still loaded in case other parts use them) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

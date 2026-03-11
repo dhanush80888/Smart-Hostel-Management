@@ -41,9 +41,24 @@ manage.py              # Django management script
    cd c:\Users\User\Desktop\files
    ```
 
-2. **Install dependencies** (if requirements.txt exists):
+2. **Install dependencies** (uses `requirements.txt`):
    ```powershell
-   pip install django
+   pip install -r requirements.txt
+   ```
+   > The list includes `Django` plus the `openai` package used by the chatbot.
+
+3. **Set the OpenAI API key** (optional – required for chatbot):
+   ```powershell
+   setx OPENAI_API_KEY "<your-key-here>"  # restart shell afterward
+   ```
+   > **Important:** after setting this variable you must restart both your
+   > terminal **and** the Django development server for the change to take
+   > effect. The chatbot page will display a warning if the key or the
+   > `openai` Python package is not available.
+
+4. **Apply database migrations**:
+   ```powershell
+   python manage.py migrate
    ```
 
 3. **Apply database migrations**:
